@@ -1,50 +1,131 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, Search, User, Loader2, Plus } from "lucide-react";
-import { motion } from "framer-motion";
+import {
+  X,
+  User,
+  Loader2,
+  Plus,
+  Mail,
+  History,
+  Search,
+  ArrowRight,
+  ChevronRight,
+  UserPlus,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
-export function NewChatModal({ currentUserId, onClose, onChatCreated }: any) {
+interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  email: string;
+}
+
+interface NewChatModalProps {
+  currentUserId: string;
+  onClose: () => void;
+  onChatCreated: (chatId: string | null, newUser?: Profile) => void;
+}
+
+export function NewChatModal({
+  currentUserId,
+  onClose,
+  onChatCreated,
+}: NewChatModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Profile[]>([]);
+  const [history, setHistory] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [globalPresence, setGlobalPresence] = useState<Record<string, any>>({});
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const channel = supabase.channel("global_user_status");
-    channel
-      .on("presence", { event: "sync" }, () => {
-        setGlobalPresence(channel.presenceState());
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
+    const savedHistory = localStorage.getItem("chat_search_history");
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Failed to parse history", e);
+      }
+    }
+
+    const getUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user?.email)
+        setCurrentUserEmail(session.user.email.toLowerCase());
     };
+    getUser();
   }, []);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUserId || !searchTerm.trim()) return;
+  const saveToHistory = (email: string) => {
+    const emailLower = email.toLowerCase();
+    setHistory((prev) => {
+      const updated = [
+        emailLower,
+        ...prev.filter((e) => e !== emailLower),
+      ].slice(0, 5);
+      localStorage.setItem("chat_search_history", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeFromHistory = (e: React.MouseEvent, email: string) => {
+    e.stopPropagation();
+    const emailLower = email.toLowerCase();
+    setHistory((prev) => {
+      const updated = prev.filter((item) => item !== emailLower);
+      localStorage.setItem("chat_search_history", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleSearch = async (e?: React.FormEvent, overrideEmail?: string) => {
+    if (e) e.preventDefault();
+    setError(null);
+
+    const targetEmail = (overrideEmail || searchTerm).trim().toLowerCase();
+
+    if (!targetEmail || !targetEmail.includes("@")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (targetEmail === currentUserEmail) {
+      setError("Self-messaging is not enabled.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error: searchError } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url")
+        .select("id, full_name, avatar_url, email")
         .neq("id", currentUserId)
-        .ilike("full_name", `%${searchTerm}%`)
-        .limit(10);
-      if (error) throw error;
-      setResults(data || []);
-    } catch (error: any) {
-      console.error("Search failed:", error.message);
+        .eq("email", targetEmail)
+        .maybeSingle();
+
+      if (searchError) throw searchError;
+
+      if (data) {
+        setResults([data]);
+        saveToHistory(targetEmail);
+      } else {
+        setError("User profile not found.");
+        setResults([]);
+      }
+    } catch (err: any) {
+      setError("Search failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  const startConversation = async (otherUser: any) => {
-    if (!currentUserId) return;
+  const handleSelection = async (otherUser: Profile) => {
+    if (!currentUserId || creating) return;
     setCreating(true);
     try {
       const { data: existingChat } = await supabase
@@ -54,82 +135,87 @@ export function NewChatModal({ currentUserId, onClose, onChatCreated }: any) {
           `and(user1_id.eq.${currentUserId},user2_id.eq.${otherUser.id}),and(user1_id.eq.${otherUser.id},user2_id.eq.${currentUserId})`
         )
         .maybeSingle();
+
       if (existingChat) {
         onChatCreated(existingChat.id);
-        onClose();
-        return;
+      } else {
+        onChatCreated(null, otherUser);
       }
-      const { data: newChat, error: createError } = await supabase
-        .from("conversations")
-        .insert({
-          user1_id: currentUserId,
-          user2_id: otherUser.id,
-          last_message_text: "Connection established",
-          last_message_at: new Date().toISOString(),
-        })
-        .select("id")
-        .single();
-      if (createError) throw createError;
-      onChatCreated(newChat.id);
       onClose();
-    } catch (error: any) {
-      alert("Error: " + error.message);
+    } catch (err: any) {
+      setError("Initialization error.");
     } finally {
       setCreating(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/90 backdrop-blur-md"
+        className="absolute inset-0 bg-[#0a0c10]/85 backdrop-blur-md"
       />
+
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-lg bg-[#0d0d0d] border border-white/10 rounded-[32px] overflow-hidden p-8 shadow-2xl"
+        initial={{ opacity: 0, y: 12, scale: 0.99 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 12, scale: 0.99 }}
+        className="relative w-full max-w-[380px] bg-[#1a1d23] border border-white/10 rounded-[24px] shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-light text-white">New Transmission</h2>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <form onSubmit={handleSearch} className="relative mb-8">
-          <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
-            size={18}
-          />
-          <input
-            autoFocus
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by Name..."
-            className="w-full bg-white/[0.03] border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white outline-none focus:border-white/20 transition-all"
-          />
-        </form>
-        <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar px-1">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="animate-spin text-zinc-500" />
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">
+              Direct Message
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-1 text-zinc-600 hover:text-white transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <form onSubmit={(e) => handleSearch(e)} className="relative mb-8">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600">
+              {loading ? (
+                <Loader2 size={16} className="animate-spin text-indigo-500" />
+              ) : (
+                <Search size={16} />
+              )}
             </div>
-          ) : (
-            results.map((user) => {
-              const isOnline = !!globalPresence[user.id];
-              return (
-                <button
-                  key={user.id}
-                  onClick={() => startConversation(user)}
-                  className="w-full p-4 flex items-center justify-between bg-white/[0.01] hover:bg-white/[0.05] border border-white/5 rounded-2xl transition-all group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <div className="w-10 h-10 rounded-full bg-zinc-900 border border-white/10 overflow-hidden">
+            <input
+              autoFocus
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Enter email address..."
+              className="w-full bg-black/20 border border-white/5 py-3 pl-11 pr-10 rounded-xl text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-zinc-700"
+            />
+            {searchTerm && !loading && (
+              <button
+                type="submit"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 hover:text-indigo-400 font-bold text-xs px-2"
+              >
+                FIND
+              </button>
+            )}
+          </form>
+
+          <div className="min-h-[120px] flex flex-col">
+            <AnimatePresence mode="wait">
+              {results.length > 0 ? (
+                results.map((user) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => handleSelection(user)}
+                    className="p-4 bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 rounded-2xl flex items-center justify-between gap-3 cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex-shrink-0 border border-indigo-500/10 flex items-center justify-center overflow-hidden">
                         {user.avatar_url ? (
                           <img
                             src={user.avatar_url}
@@ -137,38 +223,86 @@ export function NewChatModal({ currentUserId, onClose, onChatCreated }: any) {
                             alt=""
                           />
                         ) : (
-                          <div className="flex items-center justify-center h-full text-zinc-700">
-                            <User size={20} />
-                          </div>
+                          <User size={18} className="text-indigo-400" />
                         )}
                       </div>
-                      {isOnline && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-[#0d0d0d] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                      )}
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-white truncate">
+                          {user.full_name || "New Connection"}
+                        </span>
+                        <span className="text-[11px] text-zinc-500 truncate">
+                          {user.email}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-white group-hover:text-emerald-400 transition-colors">
-                        {user.full_name}
-                      </p>
-                      {isOnline && (
-                        <p className="text-[8px] text-emerald-500 font-black uppercase tracking-widest mt-0.5">
-                          Active Now
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {creating ? (
-                    <Loader2 size={18} className="animate-spin text-white" />
-                  ) : (
-                    <Plus
+                    <ChevronRight
                       size={18}
-                      className="text-zinc-500 group-hover:text-white transition-colors"
+                      className="text-zinc-600 group-hover:text-white transition-colors"
                     />
-                  )}
-                </button>
-              );
-            })
-          )}
+                  </motion.div>
+                ))
+              ) : error ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-4 text-center"
+                >
+                  <p className="text-[10px] font-bold text-red-400/70 uppercase tracking-widest">
+                    {error}
+                  </p>
+                </motion.div>
+              ) : history.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                      Recent Activity
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {history.map((email) => (
+                      <div
+                        key={email}
+                        className="flex items-center justify-between p-3 hover:bg-white/[0.02] rounded-xl cursor-pointer group"
+                        onClick={() => {
+                          setSearchTerm(email);
+                          handleSearch(undefined, email);
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <History
+                            size={14}
+                            className="text-zinc-700 group-hover:text-zinc-400"
+                          />
+                          <span className="text-[12px] text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                            {email}
+                          </span>
+                        </div>
+                        <button
+                          onClick={(e) => removeFromHistory(e, email)}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-zinc-600 hover:text-white transition-all"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center py-6 text-center">
+                  <div className="w-12 h-12 bg-white/[0.02] rounded-2xl flex items-center justify-center mb-3">
+                    <UserPlus size={20} className="text-zinc-700" />
+                  </div>
+                  <h3 className="text-zinc-400 text-xs font-semibold mb-1">
+                    Start a Conversation
+                  </h3>
+                  <p className="text-zinc-600 text-[10px] leading-relaxed max-w-[180px]">
+                    Enter a verified email address to initiate a secure chat
+                    session.
+                  </p>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </motion.div>
     </div>

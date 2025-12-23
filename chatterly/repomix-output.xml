@@ -1,0 +1,4313 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+components.json
+eslint.config.mjs
+next.config.ts
+package.json
+postcss.config.mjs
+public/file.svg
+public/globe.svg
+public/next.svg
+public/vercel.svg
+public/window.svg
+README.md
+src/app/auth/callback/route.ts
+src/app/auth/forgot-password/page.tsx
+src/app/auth/page.tsx
+src/app/auth/update-password/page.tsx
+src/app/favicon.ico
+src/app/globals.css
+src/app/layout.tsx
+src/app/page.tsx
+src/components/chat/CallOverlay.tsx
+src/components/chat/ChatSidebar.tsx
+src/components/chat/ChatWindow.tsx
+src/components/chat/NewChatModal.tsx
+src/components/chat/ProfileModal.tsx
+src/lib/supabase.ts
+src/lib/utils.ts
+src/middleware.ts
+tailwind.config.ts
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="components.json">
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/app/globals.css",
+    "baseColor": "zinc",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {}
+}
+</file>
+
+<file path="eslint.config.mjs">
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  reactCompiler: true,
+};
+
+export default nextConfig;
+</file>
+
+<file path="package.json">
+{
+  "name": "chatterly",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.26",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.23",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "tw-animate-css": "^1.4.0",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="postcss.config.mjs">
+/** @type {import('postcss-load-config').Config} */
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {}, // Added the '@' and '/postcss' here
+  },
+};
+
+export default config;
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+<file path="src/app/auth/callback/route.ts">
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  const type = searchParams.get("type");
+  const next = searchParams.get("next") ?? "/";
+
+  if (code) {
+    // FIX: Await the cookies() promise
+    const cookieStore = await cookies();
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              // The set method can sometimes fail if called in a transition
+            }
+          },
+          remove(name: string, options: CookieOptions) {
+            try {
+              cookieStore.set({ name, value: "", ...options });
+            } catch (error) {
+              // Handle potential cookie set errors
+            }
+          },
+        },
+      }
+    );
+
+    try {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+      if (!error) {
+        if (type === "recovery") {
+          return NextResponse.redirect(`${origin}/auth/update-password`);
+        }
+        return NextResponse.redirect(`${origin}${next}`);
+      }
+
+      console.error("Auth Exchange Error:", error.message);
+    } catch (err) {
+      console.error("Unexpected Auth Error:", err);
+    }
+  }
+
+  // Return to login with error if exchange failed
+  return NextResponse.redirect(`${origin}/auth?error=session_exchange_failed`);
+}
+</file>
+
+<file path="src/app/auth/forgot-password/page.tsx">
+"use client";
+
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      // window.location.origin automatically detects if you are on
+      // http://localhost:3000 or https://getchatterly.vercel.app
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      });
+
+      if (error) throw error;
+
+      setMessage({
+        type: "success",
+        text: "Check your email for the password reset link.",
+      });
+    } catch (error: any) {
+      setMessage({
+        type: "error",
+        text: error.message || "An error occurred.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="h-dvh w-full bg-black flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8 bg-[#111216] p-8 rounded-2xl border border-white/5">
+        <div className="space-y-2">
+          <Link
+            href="/auth"
+            className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Login
+          </Link>
+          <h1 className="text-2xl font-semibold text-white">Reset Password</h1>
+          <p className="text-zinc-400 text-sm">
+            Enter your email and we'll send you a link to reset your password.
+          </p>
+        </div>
+
+        <form onSubmit={handleReset} className="space-y-4">
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 w-5 h-5 text-zinc-500" />
+            <input
+              type="email"
+              placeholder="Email address"
+              required
+              className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          {message && (
+            <div
+              className={`p-3 rounded-lg text-sm ${
+                message.type === "success"
+                  ? "bg-emerald-500/10 text-emerald-500"
+                  : "bg-red-500/10 text-red-500"
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              "Send Reset Link"
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/app/auth/page.tsx">
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import {
+  Loader2,
+  Lock,
+  Mail,
+  ArrowLeft,
+  Check,
+  Circle,
+  ShieldCheck,
+  Info,
+  ChevronRight,
+  Fingerprint,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function AuthPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showSuccessState, setShowSuccessState] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const mountedRef = useRef(false);
+
+  const resetFormFields = () => {
+    setEmail("");
+    setPassword("");
+    setError(null);
+    setStatusMessage(null);
+  };
+
+  const requirements = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    {
+      label: "Numbers or _ only",
+      met: /[0-9_]/.test(password) && !/[^A-Za-z0-9_]/.test(password),
+    },
+  ];
+
+  const allMet = requirements.every((r) => r.met);
+  const hasInvalidSymbols = /[^A-Za-z0-9_]/.test(password);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    setIsMounted(true);
+
+    const messageType = searchParams.get("message");
+    if (messageType === "verified") {
+      setStatusMessage("Identity verified. You can now sign in.");
+    } else if (messageType === "recovered") {
+      setStatusMessage("Password updated successfully.");
+    }
+
+    const checkInitialSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!mountedRef.current) return;
+
+      const isShielded =
+        sessionStorage.getItem("recovery_origin_shield") === "true";
+      if (session && !isShielded) {
+        router.replace("/");
+      }
+    };
+    checkInitialSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mountedRef.current) return;
+      const isShielded =
+        sessionStorage.getItem("recovery_origin_shield") === "true";
+      if (event === "SIGNED_IN" && session && !isShielded) {
+        router.push("/");
+      }
+      if (event === "PASSWORD_RECOVERY") {
+        resetFormFields();
+        setIsForgotPassword(true);
+      }
+    });
+
+    return () => {
+      mountedRef.current = false;
+      subscription.unsubscribe();
+    };
+  }, [router, searchParams]);
+
+  const triggerRedirectSequence = () => {
+    setIsRedirecting(true);
+    setTimeout(() => {
+      if (mountedRef.current) {
+        resetFormFields();
+        setShowSuccessState(false);
+        setIsLogin(true);
+        setIsRedirecting(false);
+        setStatusMessage("Identity secure. Please sign in.");
+      }
+    }, 2200);
+  };
+
+  const handleAuth = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setError(null);
+    setStatusMessage(null);
+
+    if (!isLogin && !isForgotPassword) {
+      if (!allMet) {
+        setError("Please satisfy all password requirements.");
+        return;
+      }
+      if (hasInvalidSymbols) {
+        setError("Invalid symbols detected. Only _ is allowed.");
+        return;
+      }
+    }
+
+    setLoading(true);
+
+    try {
+      if (isForgotPassword) {
+        const { data: userExists, error: checkError } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("email", email)
+          .single();
+
+        if (checkError || !userExists) {
+          throw new Error("No account found with this email address.");
+        }
+
+        sessionStorage.setItem("recovery_origin_shield", "true");
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+          email,
+          {
+            redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+          }
+        );
+        if (resetError) {
+          sessionStorage.removeItem("recovery_origin_shield");
+          throw resetError;
+        }
+        setResetSent(true);
+      } else if (isLogin) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInError) throw signInError;
+        router.push("/");
+      } else {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { full_name: email.split("@")[0] },
+          },
+        });
+        if (signUpError) throw signUpError;
+        setShowSuccessState(true);
+      }
+    } catch (err: any) {
+      if (mountedRef.current) {
+        if (err.message.includes("should be different from the old password")) {
+          setError("New password must be different from your previous one.");
+        } else {
+          setError(err.message || "An unexpected error occurred.");
+        }
+      }
+    } finally {
+      if (mountedRef.current) setLoading(false);
+    }
+  };
+
+  if (!isMounted) return null;
+
+  return (
+    <div className="min-h-[100dvh] w-full bg-[#1a1b1e] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[60%] bg-indigo-500/10 blur-[100px] rounded-full" />
+        <div className="absolute bottom-[-5%] right-[-5%] w-[60%] h-[60%] bg-purple-500/10 blur-[100px] rounded-full" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-[320px] sm:max-w-[360px] z-10"
+      >
+        <div className="text-center mb-6 sm:mb-8">
+          <motion.div layoutId="logo" className="inline-block relative group">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-xl shadow-indigo-500/20">
+              C
+            </div>
+          </motion.div>
+          <h2 className="text-xl sm:text-2xl font-bold text-white mt-3 sm:mt-4">
+            Chatterly
+          </h2>
+          {!showSuccessState && !isRedirecting && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              key={isForgotPassword ? "rec" : isLogin ? "auth" : "reg"}
+              className="text-zinc-500 sm:text-zinc-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.3em] mt-2"
+            >
+              {isForgotPassword
+                ? "Account Recovery"
+                : isLogin
+                ? "Authorized Access"
+                : "Create Identity"}
+            </motion.p>
+          )}
+        </div>
+
+        <div className="bg-[#242529] border border-white/5 backdrop-blur-md rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-white/5">
+            <motion.div
+              initial={false}
+              animate={{
+                x: isLogin ? "0%" : isForgotPassword ? "-100%" : "100%",
+                width: "100%",
+                backgroundColor: isLogin ? "#6366f1" : "#a855f7",
+              }}
+              className="h-full shadow-[0_0_10px_rgba(99,102,241,0.8)]"
+            />
+          </div>
+
+          <AnimatePresence mode="wait">
+            {isRedirecting ? (
+              <motion.div
+                key="redirect-loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="py-10 sm:py-12 flex flex-col items-center justify-center space-y-5 sm:space-y-6 text-center"
+              >
+                <div className="relative">
+                  <Fingerprint className="text-indigo-500 animate-pulse w-10 h-10 sm:w-12 sm:h-12" />
+                  <motion.div
+                    initial={{ rotate: 0 }}
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="absolute inset-[-6px] sm:inset-[-8px] border-2 border-indigo-500/20 border-t-indigo-500 rounded-full"
+                  />
+                </div>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <p className="text-white text-xs sm:text-sm font-bold uppercase tracking-widest">
+                    Finalizing Identity
+                  </p>
+                  <p className="text-zinc-500 text-[9px] sm:text-[10px]">
+                    Configuring secure environment...
+                  </p>
+                </div>
+              </motion.div>
+            ) : showSuccessState ? (
+              <motion.div
+                key="signup-success"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-5 sm:space-y-6 py-1 sm:py-2 text-center"
+              >
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto border border-indigo-500/20 shadow-inner">
+                  <ShieldCheck className="text-indigo-400 w-7 h-7 sm:w-8 sm:h-8" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-white text-base sm:text-lg font-bold tracking-tight">
+                    Success!
+                  </p>
+                  <p className="text-zinc-400 text-[11px] sm:text-xs leading-relaxed px-1 sm:px-2">
+                    Your Chatterly account is ready. Please check your email to
+                    verify your identity before signing in.
+                  </p>
+                </div>
+
+                <div className="pt-1 sm:pt-2">
+                  <button
+                    onClick={triggerRedirectSequence}
+                    className="w-full h-11 sm:h-12 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    Proceed to Sign In <ChevronRight size={14} />
+                  </button>
+                </div>
+              </motion.div>
+            ) : resetSent ? (
+              <motion.div
+                key="sent"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-5 sm:space-y-6 py-1 sm:py-2 text-center"
+              >
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto border border-indigo-500/20">
+                  <Mail className="text-indigo-400 w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-white text-sm font-semibold">Link Sent</p>
+                  <p className="text-zinc-400 text-[11px] sm:text-xs leading-relaxed">
+                    Check your inbox. If an account exists, you will receive a
+                    reset link shortly.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    resetFormFields();
+                    setResetSent(false);
+                    setIsForgotPassword(false);
+                    sessionStorage.removeItem("recovery_origin_shield");
+                  }}
+                  className="w-full text-[10px] sm:text-xs font-bold text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft size={14} /> Back to Sign In
+                </button>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={handleAuth}
+                className="space-y-4 sm:space-y-5 pt-1 sm:pt-2"
+              >
+                <AnimatePresence>
+                  {statusMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[9px] sm:text-[10px] font-bold mb-1 sm:mb-2"
+                    >
+                      <Info size={14} className="shrink-0" />
+                      {statusMessage}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {isForgotPassword && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetFormFields();
+                      setIsForgotPassword(false);
+                    }}
+                    className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] text-zinc-500 sm:text-zinc-400 hover:text-white mb-3 sm:mb-4 font-bold uppercase tracking-widest transition-colors"
+                  >
+                    <ArrowLeft size={14} /> Back
+                  </button>
+                )}
+
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-[#1a1b1e] border border-white/5 rounded-xl py-3 sm:py-3.5 pl-11 sm:pl-12 pr-4 text-white text-sm outline-none focus:border-indigo-500/50 transition-all"
+                      required
+                    />
+                  </div>
+
+                  {!isForgotPassword && (
+                    <>
+                      <div className="relative group">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                        <input
+                          type="password"
+                          placeholder="Password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full bg-[#1a1b1e] border border-white/5 rounded-xl py-3 sm:py-3.5 pl-11 sm:pl-12 pr-4 text-white text-sm outline-none focus:border-indigo-500/50 transition-all"
+                          required
+                        />
+                      </div>
+
+                      <AnimatePresence>
+                        {!isLogin && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="px-1 py-0.5 sm:py-1 space-y-1.5 sm:space-y-2 overflow-hidden"
+                          >
+                            {requirements.map((req, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center gap-2"
+                              >
+                                {req.met ? (
+                                  <Check
+                                    size={12}
+                                    className="text-indigo-400"
+                                  />
+                                ) : (
+                                  <Circle
+                                    size={10}
+                                    className="text-zinc-700 sm:text-zinc-600"
+                                  />
+                                )}
+                                <span
+                                  className={`text-[9px] sm:text-[10px] font-medium transition-colors ${
+                                    req.met
+                                      ? "text-zinc-300"
+                                      : "text-zinc-600 sm:text-zinc-500"
+                                  }`}
+                                >
+                                  {req.label}
+                                </span>
+                              </div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  )}
+                </div>
+
+                {error && (
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] sm:text-[10px] font-bold text-center">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-11 sm:h-12 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-[11px] sm:text-sm transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-indigo-600/20"
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin mx-auto w-5 h-5" />
+                  ) : (
+                    <span className="uppercase tracking-widest text-[10px] sm:text-xs">
+                      {isForgotPassword
+                        ? "Send Reset Link"
+                        : isLogin
+                        ? "Authenticate"
+                        : "Get Started"}
+                    </span>
+                  )}
+                </button>
+
+                {!isForgotPassword && (
+                  <div className="flex flex-col gap-3 sm:gap-4 pt-3 sm:pt-4 border-t border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        resetFormFields();
+                        setIsLogin(!isLogin);
+                      }}
+                      className="text-[10px] sm:text-xs font-semibold text-zinc-500 sm:text-zinc-400 hover:text-white transition-colors"
+                    >
+                      {isLogin
+                        ? "No account? Sign Up"
+                        : "Have an account? Sign In"}
+                    </button>
+                    {isLogin && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetFormFields();
+                          setIsForgotPassword(true);
+                        }}
+                        className="text-[10px] sm:text-xs font-semibold text-indigo-400/80 hover:text-indigo-300 transition-colors"
+                      >
+                        Forgot Password?
+                      </button>
+                    )}
+                  </div>
+                )}
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <p className="mt-8 sm:mt-10 text-center text-[9px] sm:text-[10px] text-zinc-700 sm:text-zinc-600 font-bold uppercase tracking-[0.35em] sm:tracking-[0.4em]">
+          End-to-End Encrypted Session
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/app/auth/update-password/page.tsx">
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import {
+  Loader2,
+  Lock,
+  ShieldCheck,
+  ChevronRight,
+  Check,
+  Circle,
+  AlertCircle,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function UpdatePasswordPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  // Requirement States
+  const requirements = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    { label: "One number or symbol", met: /[0-9!@#$%^&*]/.test(password) },
+  ];
+
+  const allMet = requirements.every((r) => r.met);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        setError("Security session not found. Please request a new link.");
+      }
+    };
+    checkSession();
+  }, []);
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+
+    setError(null);
+
+    if (!allMet) {
+      setError("Please satisfy all password requirements first.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Small buffer to ensure session is fully hydrated
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: password,
+      });
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setSuccess(true);
+      await supabase.auth.signOut();
+
+      setTimeout(() => {
+        router.push("/auth?message=Password updated successfully");
+      }, 2500);
+    } catch (err: any) {
+      console.error("Update error:", err);
+      setError(err.message || "Failed to update password. Try again.");
+      setLoading(false); // STOPS THE INFINITE LOADING
+    }
+  };
+
+  return (
+    <div className="min-h-[100dvh] w-full bg-[#1a1b1e] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+      {/* Ambient Glow Orbs - Exact UI */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[60%] bg-indigo-500/10 blur-[100px] rounded-full" />
+        <div className="absolute bottom-[-5%] right-[-5%] w-[60%] h-[60%] bg-purple-500/10 blur-[100px] rounded-full" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-[360px] z-10"
+      >
+        <div className="text-center mb-8">
+          <div className="inline-block relative">
+            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-indigo-500/20">
+              C
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-white mt-4">Chatterly</h2>
+          <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
+            Account Recovery
+          </p>
+        </div>
+
+        <div className="bg-[#242529] border border-white/5 backdrop-blur-md rounded-[28px] p-8 shadow-2xl relative overflow-hidden">
+          {/* Progress Glow - Exact UI */}
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-white/5">
+            <div
+              className={`h-full transition-all duration-1000 ${
+                success
+                  ? "w-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]"
+                  : "w-1/2 bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]"
+              }`}
+            />
+          </div>
+
+          <AnimatePresence mode="wait">
+            {success ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-6 py-2 text-center"
+              >
+                <div className="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20">
+                  <ShieldCheck className="text-green-400" size={24} />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-white text-sm font-semibold">Success!</p>
+                  <p className="text-zinc-400 text-xs">
+                    Password updated. Redirecting...
+                  </p>
+                </div>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleUpdatePassword} className="space-y-5 pt-2">
+                <div className="space-y-4">
+                  {/* New Password */}
+                  <div className="relative group">
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"
+                      size={18}
+                    />
+                    <input
+                      type="password"
+                      placeholder="New Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
+                      className="w-full bg-[#1a1b1e] border border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-white text-sm outline-none focus:border-indigo-500/50 transition-all placeholder:text-zinc-600"
+                      required
+                    />
+                  </div>
+
+                  {/* Requirements UI */}
+                  <div className="px-1 py-1 space-y-2">
+                    {requirements.map((req, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        {req.met ? (
+                          <Check size={12} className="text-indigo-400" />
+                        ) : (
+                          <Circle size={10} className="text-zinc-600" />
+                        )}
+                        <span
+                          className={`text-[10px] font-medium transition-colors ${
+                            req.met ? "text-zinc-300" : "text-zinc-500"
+                          }`}
+                        >
+                          {req.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="relative group">
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"
+                      size={18}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Confirm New Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={loading}
+                      className="w-full bg-[#1a1b1e] border border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-white text-sm outline-none focus:border-indigo-500/50 transition-all placeholder:text-zinc-600"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold text-center">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || !allMet}
+                  className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale-[0.5] shadow-lg shadow-indigo-600/20"
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin mx-auto" size={20} />
+                  ) : (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="uppercase tracking-widest text-xs">
+                        Update Password
+                      </span>
+                      <ChevronRight size={14} />
+                    </div>
+                  )}
+                </button>
+              </form>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <p className="mt-10 text-center text-[10px] text-zinc-600 font-bold uppercase tracking-[0.4em]">
+          End-to-End Encrypted Session
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/app/globals.css">
+/* src/app/globals.css */
+@import "tailwindcss";
+
+:root {
+  /* Slate & Silver Palette - Better for eyes than pure black */
+  --bg-void: #0f1115;
+  --bg-surface: #1a1d23;
+  --bg-elevated: #242933;
+  --foreground: #ffffff;
+  --text-muted: #94a3b8;
+  --border-glass: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  background-color: var(--bg-void);
+  color: var(--foreground);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow: hidden; /* Prevents scrollbars from the star layers */
+  margin: 0;
+}
+
+/* --- Starry Background Implementation --- */
+
+/* Star Layer 1 - Smallest, Slowest */
+.stars-sm {
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 450px 224px #fff, 120px 480px #fff, 1500px 800px #fff,
+    800px 300px #fff, 200px 900px #fff, 1200px 100px #fff;
+  animation: animStar 50s linear infinite;
+}
+
+.stars-sm::after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 450px 224px #fff, 120px 480px #fff, 1500px 800px #fff,
+    800px 300px #fff, 200px 900px #fff, 1200px 100px #fff;
+}
+
+/* Star Layer 2 - Medium */
+.stars-md {
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 900px 100px #fff,
+    1300px 600px #fff, 700px 800px #fff;
+  animation: animStar 100s linear infinite;
+}
+
+.stars-md::after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 100px 200px #fff, 400px 500px #fff, 900px 100px #fff,
+    1300px 600px #fff, 700px 800px #fff;
+}
+
+/* Star Layer 3 - Large, Fastest */
+.stars-lg {
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: 50px 150px #fff, 300px 450px #fff, 1100px 250px #fff,
+    1400px 750px #fff;
+  animation: animStar 150s linear infinite;
+}
+
+.stars-lg::after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: 50px 150px #fff, 300px 450px #fff, 1100px 250px #fff,
+    1400px 750px #fff;
+}
+
+@keyframes animStar {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-2000px);
+  }
+}
+
+/* Noise Overlay */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+/* Interactive Feedback */
+.tap-effect:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+</file>
+
+<file path="src/app/layout.tsx">
+"use client";
+
+import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import "./globals.css";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // 1. Handle Sign Out
+      if (event === "SIGNED_OUT") {
+        window.location.href = "/auth";
+        return;
+      }
+
+      // 2. Handle Password Recovery specifically
+      if (event === "PASSWORD_RECOVERY") {
+        return; // Background tabs will stop here
+      }
+
+      // 3. Handle Sign In
+      if (event === "SIGNED_IN" && pathname === "/auth") {
+        // Robust check: Look at the URL first
+        const isRecoveryURL =
+          window.location.hash.includes("type=recovery") ||
+          window.location.search.includes("type=recovery") ||
+          window.location.search.includes("code=");
+
+        if (isRecoveryURL) {
+          return; // This is the active recovery tab, do not redirect
+        }
+
+        // 4. THE ULTIMATE FIX FOR BACKGROUND TABS:
+        // If a session exists but no recovery info is in the URL,
+        // we check the session metadata to see if it's a recovery session
+        // before we allow a redirect to the dashboard.
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        // If the user's metadata indicates a recovery or if the session
+        // was just created via a recovery link, we skip the dashboard jump.
+        const isRecoverySession =
+          user?.recovery_sent_at &&
+          new Date().getTime() - new Date(user.recovery_sent_at).getTime() <
+            1000 * 60 * 10;
+
+        if (!isRecoverySession) {
+          router.push("/");
+          router.refresh();
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router, pathname]);
+
+  return (
+    <html lang="en">
+      <body className="bg-[#0d0e12] antialiased" suppressHydrationWarning>
+        {children}
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="src/app/page.tsx">
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { ChatSidebar } from "@/components/chat/ChatSidebar";
+import { ChatWindow } from "@/components/chat/ChatWindow";
+import ProfileModal from "@/components/chat/ProfileModal";
+import { NewChatModal } from "@/components/chat/NewChatModal";
+import { AnimatePresence } from "framer-motion";
+import { Loader2, MessageSquare } from "lucide-react";
+
+export default function RootChatPage() {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [chats, setChats] = useState<any[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [tempChat, setTempChat] = useState<any | null>(null);
+  const [presence, setPresence] = useState<Record<string, any>>({});
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchChats = useCallback(async (userId: string) => {
+    if (!userId) return;
+    try {
+      const { data: convos, error: convosError } = await supabase
+        .from("conversations")
+        .select(
+          `
+          id, 
+          last_message_text, 
+          last_message_at, 
+          last_message_user_id,
+          user1_id,
+          user2_id,
+          user1_deleted_at,
+          user2_deleted_at,
+          user1_archived,
+          user2_archived,
+          is_archived,
+          user1:profiles!user1_id(id, full_name, avatar_url, bio, last_seen, email), 
+          user2:profiles!user2_id(id, full_name, avatar_url, bio, last_seen, email)
+        `
+        )
+        .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+
+      if (convosError) throw convosError;
+
+      const conversationIds = convos?.map((c) => c.id) || [];
+
+      const [unreadRes, lastMessagesRes] = await Promise.all([
+        supabase
+          .from("messages")
+          .select("conversation_id, created_at")
+          .in("conversation_id", conversationIds)
+          .eq("is_read", false)
+          .neq("user_id", userId),
+        supabase
+          .from("messages")
+          .select("conversation_id, is_read, created_at")
+          .in("conversation_id", conversationIds)
+          .order("created_at", { ascending: false }),
+      ]);
+
+      const mapped = (convos || []).map((c: any) => {
+        const other = c.user1?.id === userId ? c.user2 : c.user1;
+        const isUser1 = c.user1_id === userId;
+        const deletedAt = isUser1 ? c.user1_deleted_at : c.user2_deleted_at;
+
+        const isDeleted =
+          deletedAt &&
+          (!c.last_message_at ||
+            new Date(c.last_message_at) <= new Date(deletedAt));
+
+        const unreadCount =
+          unreadRes.data?.filter((m) => {
+            const isMatch = m.conversation_id === c.id;
+            if (!deletedAt) return isMatch;
+            return isMatch && new Date(m.created_at) > new Date(deletedAt);
+          }).length || 0;
+
+        const lastMsgData = lastMessagesRes.data?.find(
+          (m) => m.conversation_id === c.id
+        );
+
+        // Professional fallback text for new or empty chats
+        const displayMsg =
+          isDeleted || !c.last_message_text
+            ? "Start a conversation"
+            : c.last_message_text;
+
+        return {
+          ...c,
+          isDeleted,
+          otherId: other?.id,
+          name: other?.full_name,
+          avatar_url: other?.avatar_url,
+          bio: other?.bio,
+          email: other?.email,
+          last_seen_db: other?.last_seen,
+          last_msg: displayMsg,
+          // Since created_at is missing from the table, we sort by last_message_at
+          last_at: c.last_message_at || null,
+          last_msg_user_id: isDeleted ? null : c.last_message_user_id,
+          unread_count: isDeleted ? 0 : unreadCount,
+          last_msg_is_read: lastMsgData ? lastMsgData.is_read : true,
+        };
+      });
+
+      setChats(
+        mapped.sort((a, b) => {
+          // Push chats with no messages (new chats) to the absolute top
+          if (!a.last_at && b.last_at) return -1;
+          if (a.last_at && !b.last_at) return 1;
+          if (!a.last_at && !b.last_at) return 0;
+          return new Date(b.last_at).getTime() - new Date(a.last_at).getTime();
+        })
+      );
+    } catch (e: any) {
+      console.error("Fetch Error:", e.message || e);
+    }
+  }, []);
+
+  useEffect(() => {
+    let presenceChannel: any;
+    let dataChannel: any;
+
+    const init = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return router.replace("/auth");
+
+      const uid = session.user.id;
+      setCurrentUser(session.user);
+
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", uid)
+        .single();
+      setProfile(prof);
+
+      await fetchChats(uid);
+
+      presenceChannel = supabase.channel("online-status", {
+        config: { presence: { key: uid } },
+      });
+      presenceChannel
+        .on("presence", { event: "sync" }, () =>
+          setPresence(presenceChannel.presenceState())
+        )
+        .subscribe(async (status: string) => {
+          if (status === "SUBSCRIBED") {
+            await presenceChannel.track({
+              online_at: new Date().toISOString(),
+            });
+            await supabase
+              .from("profiles")
+              .update({ last_seen: new Date().toISOString() })
+              .eq("id", uid);
+          }
+        });
+
+      dataChannel = supabase
+        .channel("global-sync")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "messages" },
+          () => fetchChats(uid)
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "conversations" },
+          () => fetchChats(uid)
+        )
+        .subscribe();
+
+      setLoading(false);
+    };
+
+    init();
+    return () => {
+      if (presenceChannel) supabase.removeChannel(presenceChannel);
+      if (dataChannel) supabase.removeChannel(dataChannel);
+    };
+  }, [router, fetchChats]);
+
+  const currentActiveChat =
+    chats.find((c) => c.id === selectedChatId) || tempChat;
+
+  const visibleChats = chats.filter(
+    (c) => (!c.isDeleted && c.is_archived !== true) || c.id === selectedChatId
+  );
+
+  if (loading || !currentUser)
+    return (
+      <div className="h-dvh w-full bg-black flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#6366f1]" />
+      </div>
+    );
+
+  return (
+    <main className="flex h-dvh w-full bg-black text-white overflow-hidden fixed inset-0">
+      <div
+        className={`${
+          selectedChatId || tempChat ? "hidden md:flex" : "flex"
+        } w-full md:w-[380px] h-full border-r border-white/5 flex-shrink-0 bg-[#111216]`}
+      >
+        <ChatSidebar
+          chats={visibleChats}
+          selectedId={selectedChatId || (tempChat ? "temp" : null)}
+          onSelectChat={(id) => {
+            setSelectedChatId(id);
+            setTempChat(null);
+          }}
+          profile={profile}
+          onOpenProfile={() => setIsProfileModalOpen(true)}
+          onNewChat={() => setIsNewChatOpen(true)}
+          presence={presence}
+          currentUserId={currentUser.id}
+          onRefresh={() => fetchChats(currentUser.id)}
+        />
+      </div>
+
+      <div
+        className={`${
+          !(selectedChatId || tempChat) ? "hidden md:flex" : "flex"
+        } flex-1 h-full bg-[#08080a] overflow-hidden relative`}
+      >
+        {(selectedChatId || tempChat) && currentActiveChat ? (
+          <ChatWindow
+            chat={currentActiveChat}
+            currentUser={currentUser}
+            onBack={() => {
+              setSelectedChatId(null);
+              setTempChat(null);
+            }}
+            onRefresh={() => fetchChats(currentUser.id)}
+            presence={presence}
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center relative">
+            <div className="absolute w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="flex flex-col items-center gap-5">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
+                <MessageSquare className="w-8 h-8 text-white stroke-[2.5px]" />
+              </div>
+              <div className="text-center space-y-1">
+                <h2 className="text-zinc-200 font-medium text-sm tracking-wide">
+                  Select a conversation
+                </h2>
+                <p className="text-zinc-600 text-[11px] font-medium tracking-widest uppercase">
+                  To start chatting
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {isProfileModalOpen && (
+          <ProfileModal
+            profile={profile}
+            isOpen={isProfileModalOpen}
+            onClose={() => setIsProfileModalOpen(false)}
+            onUpdate={() => {
+              fetchChats(currentUser.id);
+              supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", currentUser.id)
+                .single()
+                .then(({ data }) => setProfile(data));
+            }}
+          />
+        )}
+        {isNewChatOpen && (
+          <NewChatModal
+            isOpen={isNewChatOpen}
+            currentUserId={currentUser?.id}
+            onClose={() => setIsNewChatOpen(false)}
+            onChatCreated={(id, newUser) => {
+              if (id) {
+                setSelectedChatId(id);
+                setTempChat(null);
+              } else if (newUser) {
+                setSelectedChatId(null);
+                setTempChat({
+                  id: null,
+                  otherId: newUser.id,
+                  name: newUser.full_name,
+                  avatar_url: newUser.avatar_url,
+                  email: newUser.email,
+                  is_temp: true,
+                });
+              }
+              fetchChats(currentUser.id);
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </main>
+  );
+}
+</file>
+
+<file path="src/components/chat/CallOverlay.tsx">
+"use client";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Mic,
+  Volume2,
+  PhoneOff,
+  ShieldCheck,
+  X,
+  Maximize2,
+} from "lucide-react";
+
+export function CallOverlay({ isOpen, onClose, contactName }: any) {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (isOpen) interval = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
+  const formatTime = (s: number) => {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-[100] flex items-center justify-center p-0 md:p-6 bg-black/60 backdrop-blur-xl transition-all"
+    >
+      <motion.div
+        initial={{ y: 100, opacity: 0, scale: 0.9 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 100, opacity: 0, scale: 0.9 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        className="relative w-full h-full md:max-w-[380px] md:max-h-[720px] md:rounded-[40px] md:border md:border-white/10 bg-[#09090B] shadow-2xl flex flex-col items-center justify-between p-10 md:p-12 overflow-hidden"
+      >
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5">
+            <ShieldCheck size={12} className="text-emerald-500" />
+            <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-[0.2em]">
+              Secure_Signal
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-8">
+          <div className="relative">
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="absolute inset-0 rounded-full bg-white"
+            />
+            <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center text-3xl font-bold text-white relative z-10">
+              {contactName.charAt(0)}
+            </div>
+          </div>
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-white uppercase tracking-tight">
+              {contactName}
+            </h2>
+            <p className="text-lg font-mono text-zinc-500 mt-1 tracking-widest">
+              {formatTime(seconds)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-8 w-full">
+          <div className="flex justify-center gap-6 w-full">
+            {[Mic, Volume2, Maximize2].map((Icon, i) => (
+              <motion.button
+                key={i}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="w-12 h-12 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white"
+              >
+                <Icon size={20} />
+              </motion.button>
+            ))}
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={onClose}
+            className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(239,68,68,0.2)] hover:bg-red-600 mb-4"
+          >
+            <PhoneOff size={26} />
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+</file>
+
+<file path="src/components/chat/ChatSidebar.tsx">
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Search,
+  Plus,
+  User,
+  LogOut,
+  X,
+  Mail,
+  Check,
+  CheckCheck,
+  Edit2,
+  Archive,
+  ArchiveRestore,
+  MessageSquarePlus,
+  Image as ImageIcon,
+  Camera,
+  Loader2,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { motion, AnimatePresence } from "framer-motion";
+
+export function ChatSidebar({
+  chats,
+  selectedId,
+  onSelectChat,
+  profile,
+  onNewChat,
+  presence,
+  currentUserId,
+  onRefresh,
+}: any) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [view, setView] = useState<"active" | "archived">("active");
+  const [selectedChatIds, setSelectedChatIds] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showZoomedAvatar, setShowZoomedAvatar] = useState(false);
+
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [editedBio, setEditedBio] = useState("");
+
+  const fastTransition = {
+    type: "spring",
+    stiffness: 500,
+    damping: 30,
+    mass: 1,
+  };
+
+  useEffect(() => {
+    if (profile) {
+      setEditedName(profile.full_name || "");
+      setEditedBio(profile.bio || "");
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    const clearUnreadMessages = async () => {
+      if (!selectedId || !currentUserId) return;
+      const currentChat = chats.find((c: any) => c.id === selectedId);
+      if (
+        currentChat &&
+        currentChat.unread_count > 0 &&
+        currentChat.last_msg_user_id !== currentUserId
+      ) {
+        try {
+          await supabase
+            .from("messages")
+            .update({ is_read: true })
+            .eq("conversation_id", selectedId)
+            .eq("is_read", false)
+            .neq("user_id", currentUserId);
+
+          if (onRefresh) onRefresh();
+        } catch (err) {
+          console.error("Error clearing unread:", err);
+        }
+      }
+    };
+    clearUnreadMessages();
+  }, [selectedId, currentUserId, chats, onRefresh]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUserId) return;
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${currentUserId}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", currentUserId);
+
+      if (updateError) throw updateError;
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRightClick = (e: React.MouseEvent, chatId: string) => {
+    e.preventDefault();
+    toggleSelection(chatId);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent, chatId: string) => {
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    longPressTimer.current = setTimeout(() => {
+      toggleSelection(chatId);
+      if (window.navigator.vibrate) window.navigator.vibrate(50);
+    }, 600);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPos.current || !longPressTimer.current) return;
+    const touch = e.touches[0];
+    const moveX = Math.abs(touch.clientX - touchStartPos.current.x);
+    const moveY = Math.abs(touch.clientY - touchStartPos.current.y);
+    if (moveX > 10 || moveY > 10) {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    touchStartPos.current = null;
+  };
+
+  const toggleSelection = (chatId: string) => {
+    setSelectedChatIds((prev) =>
+      prev.includes(chatId)
+        ? prev.filter((id) => id !== chatId)
+        : [...prev, chatId]
+    );
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedChatIds.length === 0) return;
+    const shouldArchive = view === "active";
+
+    try {
+      if (selectedId && selectedChatIds.includes(selectedId)) {
+        onSelectChat(null);
+      }
+
+      const updates = selectedChatIds.map(async (chatId) => {
+        const localChat = chats.find((c: any) => c.id === chatId);
+        if (!localChat) return;
+
+        const column =
+          localChat.user1_id === currentUserId
+            ? "user1_archived"
+            : "user2_archived";
+
+        return supabase
+          .from("conversations")
+          .update({ [column]: shouldArchive })
+          .eq("id", chatId);
+      });
+
+      await Promise.all(updates);
+      setSelectedChatIds([]);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error archiving chats:", err);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedChatIds.length === 0) return;
+    if (!confirm("Delete selected chats? This will clear history for you."))
+      return;
+
+    try {
+      if (selectedId && selectedChatIds.includes(selectedId)) {
+        onSelectChat(null);
+      }
+
+      const deleteTime = new Date().toISOString();
+      const updates = selectedChatIds.map(async (chatId) => {
+        const localChat = chats.find((c: any) => c.id === chatId);
+        if (!localChat) return;
+
+        const isUser1 = localChat.user1_id === currentUserId;
+        const deleteCol = isUser1 ? "user1_deleted_at" : "user2_deleted_at";
+        const hideCol = isUser1 ? "user1_is_hidden" : "user2_is_hidden";
+
+        return supabase
+          .from("conversations")
+          .update({
+            [deleteCol]: deleteTime,
+            [hideCol]: true,
+          })
+          .eq("id", chatId);
+      });
+
+      await Promise.all(updates);
+      setSelectedChatIds([]);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error deleting chats:", err);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      localStorage.clear();
+      window.location.href = "/auth";
+    } catch (error) {
+      console.error("Sign out failed", error);
+      window.location.href = "/auth";
+    }
+  };
+
+  const updateProfile = async (field: string, value: string) => {
+    try {
+      if (!currentUserId) return;
+      await supabase
+        .from("profiles")
+        .update({ [field]: value })
+        .eq("id", currentUserId);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error updating profile:", err);
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+    const now = new Date();
+    if (date.toDateString() === now.toDateString()) {
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    }
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return date.toLocaleDateString([], { day: "2-digit", month: "2-digit" });
+  };
+
+  const archivedCount = chats.filter((chat: any) => {
+    return chat.user1_id === currentUserId
+      ? chat.user1_archived
+      : chat.user2_archived;
+  }).length;
+
+  const filteredChats = chats.filter((chat: any) => {
+    const matchesSearch = chat.name
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const isUser1 = chat.user1_id === currentUserId;
+    const isActuallyArchived = isUser1
+      ? chat.user1_archived
+      : chat.user2_archived;
+
+    const isHiddenForMe = isUser1 ? chat.user1_is_hidden : chat.user2_is_hidden;
+
+    if (isHiddenForMe) return false;
+
+    const matchesView =
+      view === "archived" ? !!isActuallyArchived : !isActuallyArchived;
+
+    return matchesSearch && matchesView;
+  });
+
+  return (
+    <div className="flex flex-col h-full bg-[#1e2229] border-r border-white/5 w-full select-none relative overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-[35%] h-[35%] rounded-full bg-indigo-500/10 blur-[80px]" />
+        <div className="absolute bottom-[15%] right-[-5%] w-[25%] h-[25%] rounded-full bg-indigo-600/5 blur-[70px]" />
+      </div>
+
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="px-5 pt-8 md:pt-10 pb-4 h-[90px] md:h-[100px] flex items-center justify-between overflow-hidden">
+          <AnimatePresence mode="popLayout">
+            {selectedChatIds.length === 0 ? (
+              <motion.div
+                key="default-header"
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 10, opacity: 0 }}
+                transition={fastTransition}
+                className="flex items-center justify-between w-full"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <span className="text-white font-black text-base">C</span>
+                  </div>
+                  <h1 className="text-lg font-black tracking-tight text-white">
+                    Chatterly
+                  </h1>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowProfileModal(true)}
+                  className="w-10 h-10 rounded-2xl border border-white/10 p-0.5 bg-white/5 overflow-hidden transition-transform shadow-xl"
+                >
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      className="w-full h-full rounded-[14px] object-cover"
+                      alt=""
+                    />
+                  ) : (
+                    <User size={18} className="m-auto text-zinc-400" />
+                  )}
+                </motion.button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="action-header"
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={fastTransition}
+                className="flex items-center justify-between w-full bg-indigo-500/10 border border-indigo-500/20 rounded-2xl px-4 py-2.5 mb-2 shadow-inner"
+              >
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedChatIds([])}
+                    className="p-1 text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                  <span className="text-indigo-400 font-bold text-sm">
+                    {selectedChatIds.length} Selected
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleBulkDelete}
+                    className="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all"
+                    title="Delete for me"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <button
+                    onClick={handleBulkArchive}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-500/20"
+                  >
+                    {view === "active" ? (
+                      <>
+                        <Archive size={16} /> Archive
+                      </>
+                    ) : (
+                      <>
+                        <ArchiveRestore size={16} /> Restore
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="px-4 mt-2 mb-4">
+          <div className="relative group">
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-500 transition-colors"
+              size={14}
+            />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search conversations..."
+              className="w-full bg-[#252a33]/60 border border-white/5 rounded-2xl py-2.5 pl-10 pr-4 text-[12px] outline-none text-white focus:border-indigo-500/40 transition-all"
+            />
+          </div>
+        </div>
+
+        <div className="px-4 mb-4 flex gap-2">
+          <button
+            onClick={() => {
+              setView("active");
+              setSelectedChatIds([]);
+            }}
+            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${
+              view === "active"
+                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                : "bg-white/5 text-zinc-500 hover:bg-white/10"
+            }`}
+          >
+            Chats
+          </button>
+          <button
+            onClick={() => {
+              setView("archived");
+              setSelectedChatIds([]);
+            }}
+            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+              view === "archived"
+                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                : "bg-white/5 text-zinc-500 hover:bg-white/10"
+            }`}
+          >
+            Archived{" "}
+            {archivedCount > 0 && (
+              <span className="opacity-60">{archivedCount}</span>
+            )}
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-10 space-y-1.5 custom-scrollbar relative z-10">
+          <AnimatePresence initial={false}>
+            {filteredChats.length > 0 ? (
+              filteredChats.map((chat: any) => {
+                const isSelected = selectedId === chat.id;
+                const isMultiSelected = selectedChatIds.includes(chat.id);
+                const isOnline = presence && !!presence[chat.otherId];
+                const isMe = chat.last_msg_user_id === currentUserId;
+                const hasUnread = chat.unread_count > 0 && !isSelected && !isMe;
+
+                return (
+                  <motion.button
+                    layout
+                    key={chat.id}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    onContextMenu={(e) => handleRightClick(e, chat.id)}
+                    onTouchStart={(e) => handleTouchStart(e, chat.id)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onClick={() =>
+                      selectedChatIds.length > 0
+                        ? toggleSelection(chat.id)
+                        : onSelectChat(chat.id)
+                    }
+                    className={`w-full flex items-center gap-3 p-3 rounded-[24px] transition-all border relative ${
+                      isMultiSelected
+                        ? "bg-indigo-500/20 border-indigo-500/50"
+                        : isSelected
+                        ? "bg-gradient-to-r from-indigo-600 to-violet-600 border-white/20 shadow-xl"
+                        : "hover:bg-white/5 border-transparent text-zinc-300"
+                    }`}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <div
+                        className={`w-12 h-12 rounded-[18px] overflow-hidden border ${
+                          isSelected ? "border-white/40" : "border-white/5"
+                        }`}
+                      >
+                        {chat.avatar_url ? (
+                          <img
+                            src={chat.avatar_url}
+                            className="w-full h-full object-cover"
+                            alt=""
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center font-bold text-sm bg-[#2d3442] text-zinc-400">
+                            {chat.name?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      {isMultiSelected && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center border-2 border-[#1e2229] shadow-lg">
+                          <Check size={10} className="text-white font-bold" />
+                        </div>
+                      )}
+                      {isOnline && !isMultiSelected && (
+                        <span
+                          className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[2.5px] rounded-full ${
+                            isSelected
+                              ? "border-indigo-600"
+                              : "border-[#1e2229]"
+                          }`}
+                        />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex justify-between items-center mb-0.5">
+                        <span
+                          className={`text-[13.5px] truncate font-bold ${
+                            isSelected ? "text-white" : "text-slate-100"
+                          }`}
+                        >
+                          {chat.name}
+                        </span>
+                        <span
+                          className={`text-[10px] ${
+                            isSelected ? "text-indigo-100" : "text-zinc-500"
+                          }`}
+                        >
+                          {formatTime(chat.last_at)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          {isMe && (
+                            <span
+                              className={
+                                isSelected ? "text-white" : "text-blue-500"
+                              }
+                            >
+                              {chat.last_msg_is_read ? (
+                                <CheckCheck
+                                  size={14}
+                                  className="drop-shadow-[0_0_3px_rgba(59,130,246,0.5)]"
+                                />
+                              ) : (
+                                <Check size={14} className="text-zinc-500" />
+                              )}
+                            </span>
+                          )}
+                          <p
+                            className={`text-[11.5px] truncate ${
+                              isSelected
+                                ? "text-indigo-100/80"
+                                : "text-zinc-500"
+                            }`}
+                          >
+                            {chat.last_msg === "shared an image" ? (
+                              <span className="flex items-center gap-1">
+                                <ImageIcon size={12} /> Photo
+                              </span>
+                            ) : (
+                              chat.last_msg || "New chat"
+                            )}
+                          </p>
+                        </div>
+                        {hasUnread && (
+                          <div className="w-2 h-2 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/50" />
+                        )}
+                      </div>
+                    </div>
+                  </motion.button>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
+                <MessageSquarePlus size={40} className="mb-4" />
+                <p className="text-xs">No conversations found</p>
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="absolute bottom-6 right-6 z-[100]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-1 rounded-[22px] bg-[#1e2229]/40 backdrop-blur-md border border-white/10"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onNewChat}
+              className="w-11 h-11 bg-indigo-500 text-white rounded-[18px] flex items-center justify-center shadow-[0_8px_20px_rgba(0,0,0,0.4)] shadow-indigo-500/30 border border-white/20"
+            >
+              <Plus size={22} strokeWidth={3} />
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Profile Modal */}
+      <AnimatePresence>
+        {showProfileModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isUploading && setShowProfileModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+            />
+
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 30 }}
+              className="relative w-full max-w-[360px] bg-[#1a1b1e] border border-white/10 rounded-[40px] shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden"
+            >
+              {/* Header Cover */}
+              <div className="h-32 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_20%,#ffffff,transparent)]" />
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="absolute top-5 right-5 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all backdrop-blur-md"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="px-8 pb-10 -mt-14 relative">
+                {/* Avatar Section */}
+                <div className="relative inline-block mb-6">
+                  <div
+                    onClick={() =>
+                      profile?.avatar_url && setShowZoomedAvatar(true)
+                    }
+                    className={`w-24 h-24 rounded-[32px] border-[6px] border-[#1a1b1e] bg-[#242529] overflow-hidden shadow-2xl relative ${
+                      profile?.avatar_url ? "cursor-zoom-in" : ""
+                    }`}
+                  >
+                    {isUploading ? (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                        <Loader2 className="animate-spin text-white" />
+                      </div>
+                    ) : profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        className="w-full h-full object-cover"
+                        alt=""
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl font-black text-indigo-400 bg-indigo-500/10">
+                        {profile?.full_name?.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                    className="absolute bottom-0 -right-2 p-2.5 bg-white text-indigo-600 rounded-2xl shadow-xl hover:scale-110 transition-transform border border-white/20 active:scale-95 z-10"
+                  >
+                    <Camera size={16} strokeWidth={2.5} />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+
+                <div className="space-y-6">
+                  {/* Name Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5 px-1">
+                      <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[2.5px]">
+                        Identity
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (isEditingName)
+                            updateProfile("full_name", editedName);
+                          setIsEditingName(!isEditingName);
+                        }}
+                        className="text-indigo-400 text-[11px] font-bold hover:text-indigo-300 transition-colors"
+                      >
+                        {isEditingName ? "Save Changes" : "Edit"}
+                      </button>
+                    </div>
+                    {isEditingName ? (
+                      <input
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
+                        autoFocus
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white outline-none focus:border-indigo-500/50 transition-all"
+                      />
+                    ) : (
+                      <h2 className="text-2xl font-black text-white px-1 tracking-tight flex items-center gap-2">
+                        {profile?.full_name || "New User"}
+                        <ShieldCheck size={18} className="text-emerald-500" />
+                      </h2>
+                    )}
+                  </div>
+
+                  {/* Bio Section */}
+                  <div className="bg-white/[0.03] rounded-[28px] p-5 border border-white/5 relative group">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[10px] font-black text-indigo-400/80 uppercase tracking-widest">
+                        Bio / Status
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (isEditingBio) updateProfile("bio", editedBio);
+                          setIsEditingBio(!isEditingBio);
+                        }}
+                      >
+                        <Edit2
+                          size={12}
+                          className="text-zinc-600 group-hover:text-white transition-colors"
+                        />
+                      </button>
+                    </div>
+                    {isEditingBio ? (
+                      <textarea
+                        value={editedBio}
+                        onChange={(e) => setEditedBio(e.target.value)}
+                        className="w-full bg-black/30 rounded-2xl p-4 text-xs text-zinc-300 outline-none border border-indigo-500/30 resize-none h-24 scrollbar-hide"
+                      />
+                    ) : (
+                      <p className="text-[13px] text-zinc-400 leading-relaxed italic px-1">
+                        {profile?.bio || "Tell the world about yourself..."}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Contact / System Info */}
+                  <div className="grid grid-cols-1 gap-2.5">
+                    <div className="flex items-center gap-4 px-5 py-4 bg-white/[0.02] rounded-2xl border border-white/5">
+                      <Mail size={16} className="text-zinc-500" />
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-tight">
+                          Email Address
+                        </span>
+                        <span className="text-[12px] text-zinc-300 font-medium truncate max-w-[200px]">
+                          {profile?.email}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-2 flex flex-col gap-3">
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full py-4 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-[24px] transition-all duration-300 flex items-center justify-center gap-2.5 font-bold text-[11px] uppercase tracking-[1.5px] border border-red-500/20 shadow-lg shadow-red-500/5"
+                    >
+                      <LogOut size={16} />
+                      Terminate Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Image Zoom */}
+      <AnimatePresence>
+        {showZoomedAvatar && profile?.avatar_url && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowZoomedAvatar(false)}
+              className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+            />
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              className="relative max-w-lg w-full aspect-square"
+            >
+              <img
+                src={profile.avatar_url}
+                className="w-full h-full object-contain rounded-[40px] shadow-2xl"
+                alt="Zoomed Avatar"
+              />
+              <button
+                onClick={() => setShowZoomedAvatar(false)}
+                className="absolute -top-12 right-0 p-2 text-white hover:text-indigo-400 transition-colors"
+              >
+                <X size={32} />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/chat/ChatWindow.tsx">
+"use client";
+
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
+import {
+  Send,
+  Paperclip,
+  Loader2,
+  ChevronLeft,
+  Info,
+  X,
+  Trash2,
+  Image as ImageIcon,
+  Shield,
+  User,
+  MessageSquare,
+  Calendar,
+  Maximize2,
+  Check,
+  CheckCheck,
+  Mail,
+  Download,
+} from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { motion, AnimatePresence } from "framer-motion";
+
+export function ChatWindow({
+  chat,
+  currentUser,
+  onBack,
+  onRefresh,
+  presence,
+}: any) {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(
+    chat?.id || null
+  );
+
+  const [optimisticImage, setOptimisticImage] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const isSelectionMode = selectedIds.length > 0;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper to get the correct delete timestamp for the current user
+  const getDeleteTime = useCallback(() => {
+    return chat.user1_id === currentUser?.id
+      ? chat.user1_deleted_at
+      : chat.user2_deleted_at;
+  }, [chat, currentUser]);
+
+  useEffect(() => {
+    setCurrentChatId(chat?.id || null);
+  }, [chat?.id]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatJoinedDate = (dateString: string) => {
+    if (!dateString) return "Dec 2025";
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        year: "numeric",
+      }).format(date);
+    } catch (e) {
+      return "Dec 2025";
+    }
+  };
+
+  const downloadImage = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `IMG_${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      window.open(url, "_blank");
+    }
+  };
+
+  const markAsRead = useCallback(async () => {
+    const activeId = currentChatId;
+    if (!activeId || !currentUser?.id) return;
+    try {
+      await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("conversation_id", activeId)
+        .neq("user_id", currentUser.id)
+        .eq("is_read", false);
+
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error clearing unread:", err);
+    }
+  }, [currentChatId, currentUser?.id, onRefresh]);
+
+  const isOnline = useMemo(
+    () => presence && !!presence[chat.otherId],
+    [presence, chat.otherId]
+  );
+
+  const sharedMedia = useMemo(() => {
+    return messages.filter((m) => m.type === "image").map((m) => m.text);
+  }, [messages]);
+
+  const renderStatus = () => {
+    if (isOnline)
+      return (
+        <div className="flex items-center">
+          <span className="text-emerald-500 font-bold tracking-tight text-[9px]">
+            ONLINE
+          </span>
+        </div>
+      );
+    if (!chat.last_seen_db)
+      return (
+        <span className="text-zinc-400 font-bold text-[9px]">OFFLINE</span>
+      );
+    const lastSeenDate = new Date(chat.last_seen_db);
+    const diffInMs = new Date().getTime() - lastSeenDate.getTime();
+    const diffInSecs = Math.floor(diffInMs / 1000);
+    let statusText = "";
+    if (diffInSecs < 60) statusText = "JUST NOW";
+    else if (diffInSecs < 3600)
+      statusText = `${Math.floor(diffInSecs / 60)}M AGO`;
+    else if (diffInSecs < 86400)
+      statusText = `${Math.floor(diffInSecs / 3600)}H AGO`;
+    else
+      statusText = lastSeenDate.toLocaleDateString([], {
+        day: "numeric",
+        month: "short",
+      });
+    return (
+      <span className="text-zinc-400 font-bold text-[9px] uppercase tracking-wider">
+        {statusText}
+      </span>
+    );
+  };
+
+  useEffect(() => {
+    if (currentChatId) {
+      markAsRead();
+    }
+  }, [currentChatId, markAsRead]);
+
+  useEffect(() => {
+    const activeId = currentChatId;
+    if (!activeId) {
+      setMessages([]);
+      return;
+    }
+
+    const deleteTime = getDeleteTime();
+
+    const loadMessages = async () => {
+      let query = supabase
+        .from("messages")
+        .select("*")
+        .eq("conversation_id", activeId);
+
+      if (deleteTime) {
+        query = query.gt("created_at", deleteTime);
+      }
+
+      const { data } = await query.order("created_at", { ascending: true });
+      if (data) {
+        setMessages(data);
+      }
+    };
+    loadMessages();
+
+    const msgChannel = supabase
+      .channel(`chat_messages_${activeId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${activeId}`,
+        },
+        (p) => {
+          const currentDeleteTime = getDeleteTime();
+          if (
+            currentDeleteTime &&
+            new Date(p.new.created_at) <= new Date(currentDeleteTime)
+          )
+            return;
+          setMessages((prev) => {
+            const exists = prev.some((m) => m.id === p.new.id);
+            if (exists) return prev;
+            return [...prev, p.new];
+          });
+          if (p.new.user_id !== currentUser?.id) {
+            markAsRead();
+          }
+
+          if (p.new.type === "image" && p.new.user_id === currentUser?.id) {
+            setOptimisticImage(null);
+            setIsUploading(false);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${activeId}`,
+        },
+        (p) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === p.new.id ? p.new : m))
+          );
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "messages" },
+        (p) => setMessages((prev) => prev.filter((m) => m.id !== p.old.id))
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(msgChannel);
+    };
+    // FIX: Ensure dependencies here match the items that can actually change and are needed.
+    // Ensure 'chat' and 'currentUser' properties used are stable.
+  }, [currentChatId, currentUser?.id, markAsRead, chat, getDeleteTime]);
+
+  useEffect(() => {
+    if (!isSelectionMode) {
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages.length, optimisticImage, isSelectionMode]);
+
+  const ensureConversation = async () => {
+    if (currentChatId) {
+      return currentChatId;
+    }
+
+    const { data, error } = await supabase
+      .from("conversations")
+      .insert({
+        user1_id: currentUser.id,
+        user2_id: chat.otherId,
+      })
+      .select()
+      .single();
+    if (error) return null;
+
+    setCurrentChatId(data.id);
+    return data.id;
+  };
+
+  const handleSend = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newMessage.trim() || !currentUser?.id) return;
+
+    const txt = newMessage;
+    setNewMessage("");
+    try {
+      const activeChatId = await ensureConversation();
+      if (!activeChatId) return;
+
+      const now = new Date().toISOString();
+      await Promise.all([
+        supabase.from("messages").insert({
+          conversation_id: activeChatId,
+          user_id: currentUser.id,
+          text: txt,
+          type: "text",
+          is_read: false,
+          created_at: now, // Ensure timestamps match
+        }),
+        supabase
+          .from("conversations")
+          .update({
+            last_message_text: txt,
+            last_message_at: now, // This triggers the sidebar reappear logic
+            last_message_user_id: currentUser.id,
+          })
+          .eq("id", activeChatId),
+      ]);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
+  };
+
+  const handleDeleteChat = async () => {
+    if (!currentChatId || !currentUser?.id) return;
+    const isUser1 = chat.user1_id === currentUser.id;
+    const columnToUpdate = isUser1 ? "user1_deleted_at" : "user2_deleted_at";
+    try {
+      const { error } = await supabase
+        .from("conversations")
+        .update({ [columnToUpdate]: new Date().toISOString() })
+        .eq("id", currentChatId);
+      if (error) throw error;
+
+      if (onBack) onBack();
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error archiving/deleting chat:", err);
+    }
+  };
+
+  const handleDeleteMessages = async () => {
+    if (selectedIds.length === 0) return;
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .in("id", selectedIds);
+    if (!error) {
+      setMessages((prev) => prev.filter((m) => !selectedIds.includes(m.id)));
+      setSelectedIds([]);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleContextMenu = (
+    e: React.MouseEvent,
+    id: string,
+    isMe: boolean
+  ) => {
+    if (!isMe) return;
+    e.preventDefault();
+    toggleSelect(id);
+  };
+
+  const handleImage = async (e: any) => {
+    const file = e.target.files[0];
+    if (!file || !currentUser?.id) return;
+
+    setIsUploading(true);
+    const previewUrl = URL.createObjectURL(file);
+    setOptimisticImage(previewUrl);
+    try {
+      const activeChatId = await ensureConversation();
+      if (!activeChatId) throw new Error("Could not initialize conversation");
+      const path = `${activeChatId}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("chat-attachments")
+        .upload(path, file);
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("chat-attachments").getPublicUrl(path);
+      const now = new Date().toISOString();
+
+      await Promise.all([
+        supabase.from("messages").insert({
+          conversation_id: activeChatId,
+          user_id: currentUser.id,
+          text: publicUrl,
+          type: "image",
+          is_read: false,
+          created_at: now,
+        }),
+        supabase
+          .from("conversations")
+          .update({
+            last_message_text: "Shared an image",
+            last_message_at: now,
+            last_message_user_id: currentUser.id,
+          })
+          .eq("id", activeChatId),
+      ]);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Upload error:", err);
+      setIsUploading(false);
+      setOptimisticImage(null);
+    }
+  };
+
+  const getBubbleRadius = (
+    isMe: boolean,
+    isFirst: boolean,
+    isLast: boolean
+  ) => {
+    const r = "18px";
+    const s = "4px";
+    if (isMe) return `${r} ${isFirst ? r : s} ${isLast ? r : s} ${r}`;
+    return `${isFirst ? r : s} ${r} ${r} ${isLast ? r : s}`;
+  };
+
+  return (
+    <div className="flex flex-1 h-dvh bg-[#1e2229] overflow-hidden relative text-white font-sans w-full">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <motion.div
+          animate={{
+            x: [0, 100, -50, 0],
+            y: [0, -80, 50, 0],
+            scale: [1, 1.2, 0.9, 1],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            x: [0, -120, 80, 0],
+            y: [0, 100, -40, 0],
+            scale: [1, 1.3, 1, 1],
+          }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-[15%] -right-[10%] w-[70%] h-[70%] rounded-full bg-indigo-400/5 blur-[140px]"
+        />
+        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      </div>
+
+      <div className="flex flex-1 flex-col min-w-0 h-full border-r border-white/5 relative z-10 w-full overflow-hidden">
+        <div className="pt-8 md:pt-[env(safe-area-inset-top,12px)] border-b border-white/5 bg-[#252a33]/85 backdrop-blur-xl z-30 shrink-0 shadow-lg">
+          <div className="h-14 md:h-16 flex items-center px-4 md:px-5">
+            <AnimatePresence mode="wait">
+              {isSelectionMode ? (
+                <motion.div
+                  key="selection-bar"
+                  initial={{ y: -5, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -5, opacity: 0 }}
+                  className="flex items-center justify-between w-full"
+                >
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setSelectedIds([])}
+                      className="p-1.5 hover:bg-white/10 rounded-full text-zinc-400"
+                    >
+                      <X size={18} />
+                    </button>
+                    <span className="text-xs font-bold text-indigo-400">
+                      {selectedIds.length} Selected
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleDeleteMessages}
+                    className="p-2 bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all border border-red-500/20 shadow-lg shadow-red-500/5"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="chat-header"
+                  initial={{ y: 5, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 5, opacity: 0 }}
+                  className="flex items-center justify-between w-full"
+                >
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={onBack}
+                      className="md:hidden text-zinc-300 hover:text-white mr-1"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="relative cursor-pointer shrink-0"
+                        onClick={() => setSidebarOpen(true)}
+                      >
+                        <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-[13px] text-white shadow-md overflow-hidden">
+                          {chat.avatar_url ? (
+                            <img
+                              src={chat.avatar_url}
+                              className="w-full h-full object-cover"
+                              alt=""
+                            />
+                          ) : (
+                            chat.name?.charAt(0)
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col justify-center min-w-0">
+                        <h2 className="text-[13px] md:text-sm font-bold tracking-tight text-white truncate leading-none mb-1">
+                          {chat.name}
+                        </h2>
+                        <div className="flex items-center leading-none">
+                          {renderStatus()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="p-2 rounded-lg bg-white/5 text-zinc-300 hover:text-white transition-all border border-white/5"
+                  >
+                    <Info size={16} />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-4 md:px-10 md:py-6 flex flex-col bg-transparent custom-scrollbar scroll-smooth relative">
+          {messages.length > 0 || optimisticImage ? (
+            <div className="flex flex-col w-full relative z-10">
+              {messages.map((msg, index) => {
+                const isMe = msg.user_id === currentUser?.id;
+                const isSelected = selectedIds.includes(msg.id);
+                const prevMsg = messages[index - 1];
+                const nextMsg = messages[index + 1];
+                const msgDate = new Date(msg.created_at);
+                const nextMsgDate = nextMsg
+                  ? new Date(nextMsg.created_at)
+                  : null;
+                const isSameNextUser =
+                  nextMsg && nextMsg.user_id === msg.user_id;
+                const isSameNextMinute =
+                  nextMsgDate &&
+                  msgDate.getMinutes() === nextMsgDate.getMinutes() &&
+                  msgDate.getHours() === nextMsgDate.getHours() &&
+                  msgDate.getDate() === nextMsgDate.getDate();
+                const isFirstInGroup =
+                  !prevMsg || prevMsg.user_id !== msg.user_id;
+                const shouldShowTimestamp =
+                  !isSameNextUser || !isSameNextMinute;
+                const isLastInVisualGroup =
+                  !nextMsg || nextMsg.user_id !== msg.user_id;
+
+                return (
+                  <div
+                    key={`${msg.id}-${msg.created_at}`}
+                    onContextMenu={(e) => handleContextMenu(e, msg.id, isMe)}
+                    className={`w-full flex relative group transition-all duration-300 ${
+                      isMe ? "flex-row-reverse" : "flex-row"
+                    } ${shouldShowTimestamp ? "mb-3" : "mb-[2px]"}`}
+                  >
+                    <AnimatePresence>
+                      {isSelectionMode && isMe && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.5, width: 0 }}
+                          animate={{ opacity: 1, scale: 1, width: "auto" }}
+                          exit={{ opacity: 0, scale: 0.5, width: 0 }}
+                          className="flex items-center ml-3"
+                        >
+                          <button
+                            onClick={() => toggleSelect(msg.id)}
+                            className={`w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center
+                            ${
+                              isSelected
+                                ? "bg-indigo-500 border-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.4)]"
+                                : "border-white/20 bg-white/5 hover:border-indigo-400"
+                            }`}
+                          >
+                            <Check
+                              size={10}
+                              className={`text-white transition-opacity ${
+                                isSelected ? "opacity-100" : "opacity-0"
+                              }`}
+                              strokeWidth={4}
+                            />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div
+                      className={`flex flex-col flex-1 ${
+                        isMe ? "items-end" : "items-start"
+                      }`}
+                      onClick={() =>
+                        isSelectionMode && isMe && toggleSelect(msg.id)
+                      }
+                    >
+                      <motion.div
+                        initial={
+                          isFirstInGroup ? { opacity: 0, scale: 0.95 } : false
+                        }
+                        animate={{
+                          opacity: 1,
+                          scale: 1,
+                          backgroundColor: isSelected
+                            ? isMe
+                              ? "#4f46e5"
+                              : "#40495a"
+                            : msg.type === "image"
+                            ? "transparent"
+                            : isMe
+                            ? "#4f46e5"
+                            : "#2d3442",
+                        }}
+                        style={{
+                          borderRadius:
+                            msg.type === "image"
+                              ? "12px"
+                              : getBubbleRadius(
+                                  isMe,
+                                  isFirstInGroup,
+                                  isLastInVisualGroup
+                                ),
+                        }}
+                        className={`w-fit min-w-[32px] max-w-[85%] md:max-w-[70%] transition-all duration-200 relative overflow-hidden shadow-sm ${
+                          msg.type !== "image"
+                            ? `px-4 py-2 md:py-2.5 text-[13.5px] leading-relaxed ${
+                                isMe
+                                  ? "text-white"
+                                  : "text-slate-100 font-medium"
+                              }`
+                            : ""
+                        }`}
+                      >
+                        {msg.type === "image" ? (
+                          <div
+                            className="relative group/img cursor-zoom-in"
+                            onClick={() => setSelectedImage(msg.text)}
+                          >
+                            <img
+                              src={msg.text}
+                              className={`rounded-xl max-h-48 md:max-h-64 w-auto object-cover transition-all duration-300 group-hover/img:brightness-90 ${
+                                isSelected ? "brightness-50" : ""
+                              }`}
+                              alt="Shared"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                              <div className="p-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+                                <Maximize2 size={18} className="text-white" />
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap break-words relative z-10">
+                            {msg.text}
+                          </p>
+                        )}
+                      </motion.div>
+                      <div
+                        className={`flex items-center gap-1.5 mt-1.5 ${
+                          isMe ? "flex-row-reverse" : "flex-row"
+                        }`}
+                      >
+                        {shouldShowTimestamp && (
+                          <span className="text-[7.5px] font-medium text-zinc-400/30 uppercase tracking-[0.12em]">
+                            {msgDate.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })}
+                          </span>
+                        )}
+                        {isMe && (
+                          <div className="flex items-center opacity-70">
+                            {msg.is_read ? (
+                              <CheckCheck size={11} className="text-sky-400" />
+                            ) : (
+                              <Check size={11} className="text-zinc-400" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {optimisticImage && (
+                <div className="w-full flex flex-row-reverse mb-3">
+                  <div className="flex flex-col items-end flex-1">
+                    <div className="relative w-fit max-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#2d3442]/50">
+                      <img
+                        src={optimisticImage}
+                        className="max-h-40 object-cover opacity-40 grayscale-[0.5]"
+                        alt="Uploading..."
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-indigo-600/80 flex items-center justify-center shadow-xl">
+                          <Loader2
+                            className="animate-spin text-white"
+                            size={16}
+                          />
+                        </div>
+                        <span className="text-[8px] font-bold text-white uppercase tracking-widest bg-black/40 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+                          Sending...
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={scrollRef} className="h-4" />
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+              <div className="p-4 rounded-full bg-indigo-500/5 border border-indigo-500/10">
+                <MessageSquare size={18} className="text-indigo-500/30" />
+              </div>
+              <p className="text-[9px] text-zinc-500 font-black uppercase tracking-[0.15em]">
+                Encrypted Connection
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="px-4 py-4 md:px-6 md:py-4 bg-[#252a33]/85 backdrop-blur-xl border-t border-white/5 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <form
+            onSubmit={handleSend}
+            className="flex gap-2 md:gap-3 items-center max-w-4xl mx-auto"
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImage}
+              hidden
+              accept="image/*"
+            />
+            <button
+              type="button"
+              disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2.5 text-zinc-300 hover:text-white bg-white/5 rounded-lg transition-all border border-white/5 disabled:opacity-50"
+            >
+              <Paperclip size={16} />
+            </button>
+            <input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Message..."
+              className="flex-1 bg-[#2d3442] border border-white/10 text-white text-[13.5px] rounded-xl px-4 py-2.5 outline-none focus:border-indigo-500/40 transition-all placeholder:text-zinc-500"
+            />
+            <button
+              type="submit"
+              disabled={!newMessage.trim()}
+              className="bg-indigo-600 text-white h-10 w-10 flex items-center justify-center rounded-xl hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 shadow-md shadow-indigo-600/10"
+            >
+              <Send size={16} />
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Sidebar / Info Panel */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] lg:hidden"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 220 }}
+              className="fixed right-0 top-0 bottom-0 w-full lg:relative lg:w-[320px] h-full bg-[#252a33] border-l border-white/5 flex flex-col z-[100] overflow-hidden shadow-2xl"
+            >
+              <div className="pt-8 md:pt-0 h-16 px-5 border-b border-white/5 flex items-center justify-between bg-black/5">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">
+                  Contact Details
+                </h3>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="p-6 flex flex-col items-center border-b border-white/5">
+                  <div className="relative mb-4 group/pfp">
+                    <div
+                      onClick={() => setIsZoomed(true)}
+                      className="w-20 h-20 rounded-2xl bg-indigo-600 p-0.5 shadow-lg cursor-zoom-in active:scale-95 transition-transform"
+                    >
+                      <div className="w-full h-full rounded-[14px] bg-[#252a33] overflow-hidden border-2 border-[#252a33] relative">
+                        {chat.avatar_url ? (
+                          <img
+                            src={chat.avatar_url}
+                            className="w-full h-full object-cover"
+                            alt=""
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-zinc-400 text-2xl font-bold">
+                            {chat.name?.charAt(0)}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover/pfp:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover/pfp:opacity-100">
+                          <Maximize2
+                            size={16}
+                            className="text-white shadow-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <h2 className="text-lg font-bold tracking-tight text-white mb-0.5">
+                    {chat.name}
+                  </h2>
+                  <div className="mb-4">{renderStatus()}</div>
+                  <div className="w-full grid grid-cols-2 gap-2 mt-2">
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col items-center justify-center text-center">
+                      <Calendar size={14} className="text-indigo-400 mb-1.5" />
+                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">
+                        Joined
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-200">
+                        {formatJoinedDate(chat.created_at)}
+                      </span>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col items-center justify-center text-center">
+                      <Shield size={14} className="text-emerald-400 mb-1.5" />
+                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">
+                        Privacy
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-200">
+                        Verified
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 border-b border-white/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Mail size={12} className="text-indigo-400" />
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                      Email Address
+                    </h4>
+                  </div>
+                  <p className="text-[13px] text-slate-300 font-medium truncate">
+                    {chat.email || "No email provided"}
+                  </p>
+                </div>
+                <div className="p-6 border-b border-white/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <User size={12} className="text-indigo-400" />
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                      Bio
+                    </h4>
+                  </div>
+                  <p className="text-[13px] text-slate-300 leading-relaxed italic">
+                    {chat.bio || "No information shared."}
+                  </p>
+                </div>
+                <div className="p-6 border-b border-white/5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon size={12} className="text-indigo-400" />
+                      <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                        Media
+                      </h4>
+                    </div>
+                    <span className="text-[9px] font-bold px-2 py-0.5 bg-indigo-500/10 rounded text-indigo-400">
+                      {sharedMedia.length}
+                    </span>
+                  </div>
+                  {sharedMedia.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {sharedMedia.slice(0, 12).map((url, i) => (
+                        <div
+                          key={i}
+                          className="aspect-square rounded-lg bg-[#2d3442] overflow-hidden border border-white/5 cursor-pointer hover:border-indigo-500/50 transition-colors"
+                          onClick={() => setSelectedImage(url)}
+                        >
+                          <img
+                            src={url}
+                            className="w-full h-full object-cover opacity-90"
+                            alt=""
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+                      <span className="text-[9px] font-bold text-zinc-600 uppercase">
+                        Empty
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Trash2 size={12} className="text-red-400" />
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                      Danger Zone
+                    </h4>
+                  </div>
+                  <button
+                    onClick={handleDeleteChat}
+                    className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    Delete Chat For Me
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Image Viewer Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-md"
+            onClick={() => setSelectedImage(null)}
+          >
+            <button
+              className="absolute top-6 left-6 p-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white z-[310] transition-all"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X size={20} />
+            </button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative max-w-5xl max-h-full flex items-center justify-center group"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={selectedImage}
+                className="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/5"
+                alt="Enlarged view"
+              />
+              <button
+                onClick={() => downloadImage(selectedImage)}
+                className="absolute top-4 right-4 p-3 rounded-2xl bg-black/60 backdrop-blur-xl text-white hover:bg-indigo-600 border border-white/10 shadow-xl transition-all active:scale-90"
+                title="Download to device"
+              >
+                <Download size={20} />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Avatar Zoom Modal */}
+      <AnimatePresence>
+        {isZoomed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+            onClick={() => setIsZoomed(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-lg w-full aspect-square rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setIsZoomed(false)}
+                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/40 text-white/80 hover:text-white backdrop-blur-md transition-all"
+              >
+                <X size={20} />
+              </button>
+              {chat.avatar_url ? (
+                <img
+                  src={chat.avatar_url}
+                  className="w-full h-full object-cover"
+                  alt={chat.name}
+                />
+              ) : (
+                <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-7xl font-bold text-white">
+                  {chat.name?.charAt(0)}
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/40 to-transparent">
+                <h3 className="text-2xl font-bold text-white mb-1">
+                  {chat.name}
+                </h3>
+                <p className="text-zinc-400 text-sm">
+                  {isOnline ? "Active Now" : "Offline"}
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/chat/NewChatModal.tsx">
+"use client";
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  User,
+  Loader2,
+  Plus,
+  Mail,
+  History,
+  Search,
+  ArrowRight,
+  ChevronRight,
+  UserPlus,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+
+interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  email: string;
+}
+
+interface NewChatModalProps {
+  currentUserId: string;
+  onClose: () => void;
+  onChatCreated: (chatId: string | null, newUser?: Profile) => void;
+}
+
+export function NewChatModal({
+  currentUserId,
+  onClose,
+  onChatCreated,
+}: NewChatModalProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [results, setResults] = useState<Profile[]>([]);
+  const [history, setHistory] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedHistory = localStorage.getItem("chat_search_history");
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Failed to parse history", e);
+      }
+    }
+
+    const getUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user?.email)
+        setCurrentUserEmail(session.user.email.toLowerCase());
+    };
+    getUser();
+  }, []);
+
+  const saveToHistory = (email: string) => {
+    const emailLower = email.toLowerCase();
+    setHistory((prev) => {
+      const updated = [
+        emailLower,
+        ...prev.filter((e) => e !== emailLower),
+      ].slice(0, 5);
+      localStorage.setItem("chat_search_history", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeFromHistory = (e: React.MouseEvent, email: string) => {
+    e.stopPropagation();
+    const emailLower = email.toLowerCase();
+    setHistory((prev) => {
+      const updated = prev.filter((item) => item !== emailLower);
+      localStorage.setItem("chat_search_history", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleSearch = async (e?: React.FormEvent, overrideEmail?: string) => {
+    if (e) e.preventDefault();
+    setError(null);
+
+    const targetEmail = (overrideEmail || searchTerm).trim().toLowerCase();
+
+    if (!targetEmail || !targetEmail.includes("@")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (targetEmail === currentUserEmail) {
+      setError("Self-messaging is not enabled.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error: searchError } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url, email")
+        .neq("id", currentUserId)
+        .eq("email", targetEmail)
+        .maybeSingle();
+
+      if (searchError) throw searchError;
+
+      if (data) {
+        setResults([data]);
+        saveToHistory(targetEmail);
+      } else {
+        setError("User profile not found.");
+        setResults([]);
+      }
+    } catch (err: any) {
+      setError("Search failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelection = async (otherUser: Profile) => {
+    if (!currentUserId || creating) return;
+    setCreating(true);
+    try {
+      const { data: existingChat } = await supabase
+        .from("conversations")
+        .select("id")
+        .or(
+          `and(user1_id.eq.${currentUserId},user2_id.eq.${otherUser.id}),and(user1_id.eq.${otherUser.id},user2_id.eq.${currentUserId})`
+        )
+        .maybeSingle();
+
+      if (existingChat) {
+        onChatCreated(existingChat.id);
+      } else {
+        onChatCreated(null, otherUser);
+      }
+      onClose();
+    } catch (err: any) {
+      setError("Initialization error.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-[#0a0c10]/85 backdrop-blur-md"
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.99 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 12, scale: 0.99 }}
+        className="relative w-full max-w-[380px] bg-[#1a1d23] border border-white/10 rounded-[24px] shadow-2xl overflow-hidden"
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">
+              Direct Message
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-1 text-zinc-600 hover:text-white transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <form onSubmit={(e) => handleSearch(e)} className="relative mb-8">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600">
+              {loading ? (
+                <Loader2 size={16} className="animate-spin text-indigo-500" />
+              ) : (
+                <Search size={16} />
+              )}
+            </div>
+            <input
+              autoFocus
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Enter email address..."
+              className="w-full bg-black/20 border border-white/5 py-3 pl-11 pr-10 rounded-xl text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-zinc-700"
+            />
+            {searchTerm && !loading && (
+              <button
+                type="submit"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 hover:text-indigo-400 font-bold text-xs px-2"
+              >
+                FIND
+              </button>
+            )}
+          </form>
+
+          <div className="min-h-[120px] flex flex-col">
+            <AnimatePresence mode="wait">
+              {results.length > 0 ? (
+                results.map((user) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => handleSelection(user)}
+                    className="p-4 bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 rounded-2xl flex items-center justify-between gap-3 cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex-shrink-0 border border-indigo-500/10 flex items-center justify-center overflow-hidden">
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            className="w-full h-full object-cover"
+                            alt=""
+                          />
+                        ) : (
+                          <User size={18} className="text-indigo-400" />
+                        )}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-white truncate">
+                          {user.full_name || "New Connection"}
+                        </span>
+                        <span className="text-[11px] text-zinc-500 truncate">
+                          {user.email}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight
+                      size={18}
+                      className="text-zinc-600 group-hover:text-white transition-colors"
+                    />
+                  </motion.div>
+                ))
+              ) : error ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-4 text-center"
+                >
+                  <p className="text-[10px] font-bold text-red-400/70 uppercase tracking-widest">
+                    {error}
+                  </p>
+                </motion.div>
+              ) : history.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                      Recent Activity
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {history.map((email) => (
+                      <div
+                        key={email}
+                        className="flex items-center justify-between p-3 hover:bg-white/[0.02] rounded-xl cursor-pointer group"
+                        onClick={() => {
+                          setSearchTerm(email);
+                          handleSearch(undefined, email);
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <History
+                            size={14}
+                            className="text-zinc-700 group-hover:text-zinc-400"
+                          />
+                          <span className="text-[12px] text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                            {email}
+                          </span>
+                        </div>
+                        <button
+                          onClick={(e) => removeFromHistory(e, email)}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-zinc-600 hover:text-white transition-all"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center py-6 text-center">
+                  <div className="w-12 h-12 bg-white/[0.02] rounded-2xl flex items-center justify-center mb-3">
+                    <UserPlus size={20} className="text-zinc-700" />
+                  </div>
+                  <h3 className="text-zinc-400 text-xs font-semibold mb-1">
+                    Start a Conversation
+                  </h3>
+                  <p className="text-zinc-600 text-[10px] leading-relaxed max-w-[180px]">
+                    Enter a verified email address to initiate a secure chat
+                    session.
+                  </p>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/chat/ProfileModal.tsx">
+"use client";
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import {
+  X,
+  LogOut,
+  User,
+  Mail,
+  Shield,
+  Calendar,
+  ChevronRight,
+  CheckCircle2,
+  Settings2,
+  Lock,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface ProfileModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  user: any;
+}
+
+export default function ProfileModal({
+  isOpen,
+  onClose,
+  user,
+}: ProfileModalProps) {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await supabase.auth.signOut();
+    window.location.href = "/auth";
+  };
+
+  if (!mounted) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* Modal Content */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="relative w-full max-w-[440px] bg-[#1a1b1e] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl"
+          >
+            {/* Header / Banner Area */}
+            <div className="h-32 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-transparent relative">
+              <button
+                onClick={onClose}
+                className="absolute top-6 right-6 p-2 rounded-full bg-black/20 text-zinc-400 hover:text-white transition-colors backdrop-blur-md border border-white/5"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Profile Avatar Section */}
+            <div className="px-8 pb-8 -mt-12 relative">
+              <div className="flex items-end justify-between mb-6">
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-3xl bg-[#242529] border-4 border-[#1a1b1e] flex items-center justify-center text-indigo-400 shadow-xl overflow-hidden">
+                    <User
+                      size={40}
+                      className="group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 border-4 border-[#1a1b1e] rounded-full" />
+                </div>
+
+                <div className="flex gap-2 pb-2">
+                  <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider rounded-full">
+                    Pro Member
+                  </span>
+                </div>
+              </div>
+
+              {/* User Identity */}
+              <div className="space-y-1 mb-8">
+                <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                  {user?.user_metadata?.full_name || "Anonymous User"}
+                  <CheckCircle2 size={18} className="text-indigo-400" />
+                </h2>
+                <p className="text-zinc-500 text-sm font-medium flex items-center gap-2">
+                  <Mail size={14} className="text-zinc-600" />
+                  {user?.email}
+                </p>
+              </div>
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
+                  <Shield
+                    size={16}
+                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
+                  />
+                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
+                    Security
+                  </p>
+                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
+                    Verified Account
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
+                  <Calendar
+                    size={16}
+                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
+                  />
+                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
+                    Joined
+                  </p>
+                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
+                    {new Date(user?.created_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions List */}
+              <div className="space-y-2 mb-8">
+                <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-[0.2em] px-1 mb-3">
+                  System Settings
+                </p>
+
+                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                      <Settings2 size={16} />
+                    </div>
+                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+                      Preferences
+                    </span>
+                  </div>
+                  <ChevronRight
+                    size={14}
+                    className="text-zinc-600 group-hover:text-zinc-400"
+                  />
+                </button>
+
+                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                      <Lock size={16} />
+                    </div>
+                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+                      Security & Privacy
+                    </span>
+                  </div>
+                  <ChevronRight
+                    size={14}
+                    className="text-zinc-600 group-hover:text-zinc-400"
+                  />
+                </button>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="pt-6 border-t border-white/5">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full h-12 flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isLoggingOut ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    >
+                      <LogOut size={18} />
+                    </motion.div>
+                  ) : (
+                    <>
+                      <LogOut size={18} />
+                      Terminate Session
+                    </>
+                  )}
+                </button>
+                <p className="text-center text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em] mt-6">
+                  Chatterly Secure Profile • V0.1.0
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+</file>
+
+<file path="src/lib/supabase.ts">
+import { createBrowserClient } from "@supabase/ssr";
+
+export const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+</file>
+
+<file path="src/lib/utils.ts">
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+</file>
+
+<file path="src/middleware.ts">
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({ name, value, ...options });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({ name, value: "", ...options });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({ name, value: "", ...options });
+        },
+      },
+    }
+  );
+
+  // Use getUser() instead of getSession() for better security in Middleware
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const url = new URL(request.url);
+
+  // 1. EXEMPTION: Allow the recovery flow to proceed
+  const isRecoveryPath =
+    url.pathname.startsWith("/auth/update-password") ||
+    url.pathname.startsWith("/auth/callback") || // Added callback route to exemption
+    url.searchParams.get("type") === "recovery";
+
+  if (isRecoveryPath) {
+    return response;
+  }
+
+  const isAuthPage = url.pathname.startsWith("/auth");
+
+  // 2. LOGGED IN: Redirect away from auth pages (Sign In/Sign Up)
+  if (user && isAuthPage) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // 3. NOT LOGGED IN: Redirect to auth from protected pages
+  if (!user && !isAuthPage) {
+    return NextResponse.redirect(new URL("/auth", request.url));
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+};
+</file>
+
+<file path="tailwind.config.ts">
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+      },
+    },
+  },
+  plugins: [],
+};
+export default config;
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+</file>
+
+</files>

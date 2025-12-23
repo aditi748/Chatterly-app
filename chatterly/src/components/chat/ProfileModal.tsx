@@ -1,136 +1,241 @@
 "use client";
-import React, { useState } from "react";
-import { X, Camera, Save, Loader2, ShieldCheck } from "lucide-react";
+
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { motion } from "framer-motion";
+import {
+  X,
+  LogOut,
+  User,
+  Mail,
+  Shield,
+  Calendar,
+  ChevronRight,
+  CheckCircle2,
+  Settings2,
+  Lock,
+  Edit2,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export function ProfileModal({ profile, onClose, onUpdate }: any) {
-  const [loading, setLoading] = useState(false);
-  const [fullName, setFullName] = useState(profile?.full_name || "");
-  const [bio, setBio] = useState(profile?.bio || "");
-  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
+interface ProfileModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  user: any; // The Auth User object
+  profile: any; // The Database Profile object (has the edits)
+  onRefresh?: () => void;
+}
 
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ full_name: fullName, bio, avatar_url: avatarUrl })
-        .eq("id", profile.id);
+export default function ProfileModal({
+  isOpen,
+  onClose,
+  user,
+  profile,
+  onRefresh,
+}: ProfileModalProps) {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-      if (error) throw error;
-      onUpdate();
-      onClose();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await supabase.auth.signOut();
+    window.location.href = "/auth";
   };
 
-  const uploadAvatar = async (e: any) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setLoading(true);
-    try {
-      const path = `avatars/${profile.id}-${Date.now()}`;
-      await supabase.storage.from("avatars").upload(path, file);
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(path);
-      setAvatarUrl(publicUrl);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!mounted) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative w-full max-w-md bg-[#0f0f0f] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl"
-      >
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="text-emerald-500" size={18} />
-            <h2 className="text-white font-bold text-sm uppercase tracking-widest">
-              Identity
-            </h2>
-          </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="p-8">
-          <div className="flex flex-col items-center mb-8">
-            <div className="relative">
-              <div className="w-28 h-28 rounded-[2rem] bg-zinc-900 overflow-hidden border-2 border-white/10 shadow-2xl">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    className="w-full h-full object-cover"
-                    alt="avatar"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-zinc-700">
-                    No Image
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* Modal Content */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="relative w-full max-w-[440px] bg-[#1a1b1e] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl"
+          >
+            {/* Header / Banner Area */}
+            <div className="h-32 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-transparent relative">
+              <button
+                onClick={onClose}
+                className="absolute top-6 right-6 p-2 rounded-full bg-black/20 text-zinc-400 hover:text-white transition-colors backdrop-blur-md border border-white/5"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Profile Avatar Section */}
+            <div className="px-8 pb-8 -mt-12 relative">
+              <div className="flex items-end justify-between mb-6">
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-3xl bg-[#242529] border-4 border-[#1a1b1e] flex items-center justify-center text-indigo-400 shadow-xl overflow-hidden">
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User
+                        size={40}
+                        className="group-hover:scale-110 transition-transform duration-500"
+                      />
+                    )}
                   </div>
-                )}
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 border-4 border-[#1a1b1e] rounded-full" />
+                </div>
+
+                <div className="flex gap-2 pb-2">
+                  <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider rounded-full">
+                    Pro Member
+                  </span>
+                </div>
               </div>
-              <label className="absolute bottom-0 right-0 p-2 bg-white text-black rounded-xl cursor-pointer shadow-lg hover:scale-110 transition-transform">
-                <Camera size={16} />
-                <input
-                  type="file"
-                  hidden
-                  onChange={uploadAvatar}
-                  accept="image/*"
-                />
-              </label>
+
+              {/* User Identity */}
+              <div className="space-y-1 mb-6">
+                <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                  {/* Changed from user?.user_metadata?.full_name to profile?.full_name */}
+                  {profile?.full_name ||
+                    user?.user_metadata?.full_name ||
+                    "Anonymous User"}
+                  <CheckCircle2 size={18} className="text-indigo-400" />
+                </h2>
+                <p className="text-zinc-500 text-sm font-medium flex items-center gap-2">
+                  <Mail size={14} className="text-zinc-600" />
+                  {user?.email}
+                </p>
+              </div>
+
+              {/* Bio / Status Section (New) */}
+              <div className="mb-8 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1.5 flex items-center gap-2">
+                  Bio / Status
+                </p>
+                <p className="text-sm text-zinc-300 leading-relaxed italic">
+                  "{profile?.bio || "No bio set yet."}"
+                </p>
+              </div>
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
+                  <Shield
+                    size={16}
+                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
+                  />
+                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
+                    Security
+                  </p>
+                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
+                    Verified Account
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
+                  <Calendar
+                    size={16}
+                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
+                  />
+                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
+                    Joined
+                  </p>
+                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
+                    {user?.created_at
+                      ? new Date(user.created_at).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions List */}
+              <div className="space-y-2 mb-8">
+                <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-[0.2em] px-1 mb-3">
+                  System Settings
+                </p>
+
+                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                      <Settings2 size={16} />
+                    </div>
+                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+                      Preferences
+                    </span>
+                  </div>
+                  <ChevronRight
+                    size={14}
+                    className="text-zinc-600 group-hover:text-zinc-400"
+                  />
+                </button>
+
+                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                      <Lock size={16} />
+                    </div>
+                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+                      Security & Privacy
+                    </span>
+                  </div>
+                  <ChevronRight
+                    size={14}
+                    className="text-zinc-600 group-hover:text-zinc-400"
+                  />
+                </button>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="pt-6 border-t border-white/5">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full h-12 flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isLoggingOut ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    >
+                      <LogOut size={18} />
+                    </motion.div>
+                  ) : (
+                    <>
+                      <LogOut size={18} />
+                      Terminate Session
+                    </>
+                  )}
+                </button>
+                <p className="text-center text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em] mt-6">
+                  Chatterly Secure Profile • V0.1.0
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] text-zinc-500 uppercase font-black tracking-widest ml-1">
-                Display Name
-              </label>
-              <input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-white outline-none focus:border-white/10 transition-all text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] text-zinc-500 uppercase font-black tracking-widest ml-1">
-                Bio
-              </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                rows={3}
-                className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-white outline-none focus:border-white/10 transition-all text-sm resize-none"
-              />
-            </div>
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-zinc-200 transition-all"
-            >
-              {loading ? (
-                <Loader2 className="animate-spin" size={18} />
-              ) : (
-                "Update Profile"
-              )}
-            </button>
-          </div>
+          </motion.div>
         </div>
-      </motion.div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
