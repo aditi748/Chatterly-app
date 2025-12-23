@@ -212,7 +212,7 @@ export default function RootChatPage() {
         <ChatSidebar
           chats={visibleChats}
           selectedId={selectedChatId || (tempChat ? "temp" : null)}
-          onSelectChat={(id) => {
+          onSelectChat={(id: string) => {
             setSelectedChatId(id);
             setTempChat(null);
           }}
