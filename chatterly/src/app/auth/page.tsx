@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import {
@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function AuthPage() {
+// We move the logic into a sub-component so useSearchParams() is used inside a Suspense boundary
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
@@ -204,7 +205,6 @@ export default function AuthPage() {
           <motion.div layoutId="logo" className="inline-block relative group">
             <div className="absolute inset-0 bg-indigo-500/30 blur-xl rounded-full group-hover:bg-indigo-500/50 transition-all duration-500" />
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 overflow-hidden shadow-[0_8px_30px_rgb(79,70,229,0.3)]">
-              {/* HIGH-DEFINITION VECTOR LOGO */}
               <svg
                 viewBox="0 0 100 100"
                 fill="none"
@@ -526,5 +526,14 @@ export default function AuthPage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+// MAIN EXPORT: Wraps the component in a Suspense boundary to fix the build error
+export default function AuthPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthContent />
+    </Suspense>
   );
 }

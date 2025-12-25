@@ -85,7 +85,6 @@ export default function RootChatPage() {
           (m) => m.conversation_id === c.id
         );
 
-        // Professional fallback text for new or empty chats
         const displayMsg =
           isDeleted || !c.last_message_text
             ? "Start a conversation"
@@ -101,7 +100,6 @@ export default function RootChatPage() {
           email: other?.email,
           last_seen_db: other?.last_seen,
           last_msg: displayMsg,
-          // Since created_at is missing from the table, we sort by last_message_at
           last_at: c.last_message_at || null,
           last_msg_user_id: isDeleted ? null : c.last_message_user_id,
           unread_count: isDeleted ? 0 : unreadCount,
@@ -111,7 +109,6 @@ export default function RootChatPage() {
 
       setChats(
         mapped.sort((a, b) => {
-          // Push chats with no messages (new chats) to the absolute top
           if (!a.last_at && b.last_at) return -1;
           if (a.last_at && !b.last_at) return 1;
           if (!a.last_at && !b.last_at) return 0;
@@ -217,7 +214,6 @@ export default function RootChatPage() {
             setTempChat(null);
           }}
           profile={profile}
-          onOpenProfile={() => setIsProfileModalOpen(true)}
           onNewChat={() => setIsNewChatOpen(true)}
           presence={presence}
           currentUserId={currentUser.id}
@@ -283,7 +279,7 @@ export default function RootChatPage() {
             isOpen={isNewChatOpen}
             currentUserId={currentUser?.id}
             onClose={() => setIsNewChatOpen(false)}
-            onChatCreated={(id, newUser) => {
+            onChatCreated={(id: string | null, newUser?: any) => {
               if (id) {
                 setSelectedChatId(id);
                 setTempChat(null);

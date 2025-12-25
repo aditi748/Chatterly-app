@@ -21,7 +21,7 @@ import {
   Circle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Transition } from "framer-motion";
 
 export function ChatSidebar({
   chats,
@@ -49,7 +49,8 @@ export function ChatSidebar({
   const [editedName, setEditedName] = useState("");
   const [editedBio, setEditedBio] = useState("");
 
-  const fastTransition = {
+  // FIXED: Explicitly typed as Transition to resolve the TypeScript build error
+  const fastTransition: Transition = {
     type: "spring",
     stiffness: 500,
     damping: 30,
@@ -125,7 +126,6 @@ export function ChatSidebar({
 
   const updateProfile = async (field: string, value: string) => {
     if (profile && profile[field] === value) return;
-
     try {
       if (!currentUserId) return;
 
@@ -385,6 +385,7 @@ export function ChatSidebar({
                     Chatterly
                   </h1>
                 </div>
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -479,11 +480,10 @@ export function ChatSidebar({
               setView("active");
               setSelectedChatIds([]);
             }}
-            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${
-              view === "active"
-                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                : "bg-white/5 text-zinc-500 hover:bg-white/10"
-            }`}
+            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${view === "active"
+              ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+              : "bg-white/5 text-zinc-500 hover:bg-white/10"
+              }`}
           >
             Chats
           </button>
@@ -492,11 +492,10 @@ export function ChatSidebar({
               setView("archived");
               setSelectedChatIds([]);
             }}
-            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-              view === "archived"
-                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                : "bg-white/5 text-zinc-500 hover:bg-white/10"
-            }`}
+            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${view === "archived"
+              ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+              : "bg-white/5 text-zinc-500 hover:bg-white/10"
+              }`}
           >
             Archived{" "}
             {archivedCount > 0 && (
@@ -535,19 +534,17 @@ export function ChatSidebar({
                         ? toggleSelection(chat.id)
                         : onSelectChat(chat.id)
                     }
-                    className={`w-full flex items-center gap-3 p-3 rounded-[24px] transition-all border relative flex-shrink-0 ${
-                      isMultiSelected
-                        ? "bg-indigo-500/20 border-indigo-500/50"
-                        : isSelected
+                    className={`w-full flex items-center gap-3 p-3 rounded-[24px] transition-all border relative flex-shrink-0 ${isMultiSelected
+                      ? "bg-indigo-500/20 border-indigo-500/50"
+                      : isSelected
                         ? "bg-gradient-to-r from-indigo-600 to-violet-600 border-white/20 shadow-xl"
                         : "hover:bg-white/5 border-transparent text-zinc-300"
-                    }`}
+                      }`}
                   >
                     <div className="relative flex-shrink-0">
                       <div
-                        className={`w-12 h-12 rounded-[18px] overflow-hidden border ${
-                          isSelected ? "border-white/40" : "border-white/5"
-                        }`}
+                        className={`w-12 h-12 rounded-[18px] overflow-hidden border ${isSelected ? "border-white/40" : "border-white/5"
+                          }`}
                       >
                         {chat.avatar_url ? (
                           <img
@@ -568,11 +565,10 @@ export function ChatSidebar({
                       )}
                       {isOnline && !isMultiSelected && (
                         <span
-                          className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[2.5px] rounded-full ${
-                            isSelected
-                              ? "border-indigo-600"
-                              : "border-[#1e2229]"
-                          }`}
+                          className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[2.5px] rounded-full ${isSelected
+                            ? "border-indigo-600"
+                            : "border-[#1e2229]"
+                            }`}
                         />
                       )}
                     </div>
@@ -580,16 +576,14 @@ export function ChatSidebar({
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex justify-between items-center mb-0.5">
                         <span
-                          className={`text-[13.5px] truncate font-bold ${
-                            isSelected ? "text-white" : "text-slate-100"
-                          }`}
+                          className={`text-[13.5px] truncate font-bold ${isSelected ? "text-white" : "text-slate-100"
+                            }`}
                         >
                           {chat.name}
                         </span>
                         <span
-                          className={`text-[10px] ${
-                            isSelected ? "text-indigo-100" : "text-zinc-500"
-                          }`}
+                          className={`text-[10px] ${isSelected ? "text-indigo-100" : "text-zinc-500"
+                            }`}
                         >
                           {formatTime(chat.last_at)}
                         </span>
@@ -613,11 +607,10 @@ export function ChatSidebar({
                             </span>
                           )}
                           <p
-                            className={`text-[11.5px] truncate ${
-                              isSelected
-                                ? "text-indigo-100/80"
-                                : "text-zinc-500"
-                            }`}
+                            className={`text-[11.5px] truncate ${isSelected
+                              ? "text-indigo-100/80"
+                              : "text-zinc-500"
+                              }`}
                           >
                             {chat.last_msg === "shared an image" ? (
                               <span className="flex items-center gap-1">
@@ -696,9 +689,8 @@ export function ChatSidebar({
                     onClick={() =>
                       profile?.avatar_url && setShowZoomedAvatar(true)
                     }
-                    className={`w-20 h-20 rounded-[24px] border-[4px] border-[#1a1b1e] bg-[#242529] overflow-hidden shadow-2xl relative ${
-                      profile?.avatar_url ? "cursor-zoom-in" : ""
-                    }`}
+                    className={`w-20 h-20 rounded-[24px] border-[4px] border-[#1a1b1e] bg-[#242529] overflow-hidden shadow-2xl relative ${profile?.avatar_url ? "cursor-zoom-in" : ""
+                      }`}
                   >
                     {isUploading ? (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
@@ -787,11 +779,10 @@ export function ChatSidebar({
                             }
                           />
                           <span
-                            className={`text-[10px] font-medium ${
-                              isUserOnline
-                                ? "text-emerald-500"
-                                : "text-zinc-500"
-                            }`}
+                            className={`text-[10px] font-medium ${isUserOnline
+                              ? "text-emerald-500"
+                              : "text-zinc-500"
+                              }`}
                           >
                             {isUserOnline ? "Active" : "Offline"}
                           </span>
