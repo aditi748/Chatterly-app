@@ -71,7 +71,11 @@ export function ChatWindow({
   const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<any>(null);
+
+  // Fix: Long Press Threshold Tracking
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const isLongPressActive = useRef(false);
 
   const getDeleteTime = useCallback(() => {
     return chat.user1_id === currentUser?.id
@@ -144,7 +148,8 @@ export function ChatWindow({
         const otherId = chat.otherId;
         const typingUsers = Object.values(state).flat() as any[];
         const isTyping = typingUsers.some(
-          (p) => p.user_id === otherId && p.typing_chat_id === currentChatId
+          (p: any) =>
+            p.user_id === otherId && p.typing_chat_id === currentChatId
         );
         setIsOtherTyping(isTyping);
       })
@@ -176,23 +181,6 @@ export function ChatWindow({
       }).format(date);
     } catch (e) {
       return "Dec 2025";
-    }
-  };
-
-  const downloadImage = async (url: string) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `IMG_${Date.now()}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      window.open(url, "_blank");
     }
   };
 
@@ -334,7 +322,6 @@ export function ChatWindow({
         (p) => setMessages((prev) => prev.filter((m) => m.id !== p.old.id))
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(msgChannel);
     };
@@ -413,24 +400,6 @@ export function ChatWindow({
     }
   };
 
-  const handleDeleteChat = async () => {
-    if (!currentChatId || !currentUser?.id) return;
-    const isUser1 = chat.user1_id === currentUser.id;
-    const columnToUpdate = isUser1 ? "user1_deleted_at" : "user2_deleted_at";
-    try {
-      const { error } = await supabase
-        .from("conversations")
-        .update({ [columnToUpdate]: new Date().toISOString() })
-        .eq("id", currentChatId);
-      if (!error) {
-        if (onBack) onBack();
-        if (onRefresh) onRefresh();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const handleDeleteMessages = async () => {
     if (selectedIds.length === 0) return;
     const { error } = await supabase
@@ -454,19 +423,51 @@ export function ChatWindow({
     setContextMenu({ x: e.clientX, y: e.clientY, msg });
   };
 
-  const handleTouchStart = (msg: any) => {
+  // Fixed Long Press Logic with Movement Threshold
+  const handleTouchStart = (e: React.TouchEvent, msg: any) => {
     if (msg.user_id !== currentUser?.id) return;
+
+    // Record starting position
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    isLongPressActive.current = false;
+
     longPressTimer.current = setTimeout(() => {
+      isLongPressActive.current = true;
       setContextMenu({
-        x: window.innerWidth / 2 - 50,
-        y: window.innerHeight / 2,
+        x: window.innerWidth / 2 - 60,
+        y: window.innerHeight / 2 - 50,
         msg,
       });
-    }, 600);
+      // Vibrate if supported
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 700); // Higher duration for intentionality
   };
 
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPos.current || !longPressTimer.current) return;
+
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
+
+    // If moved more than 10px, it's a scroll, not a long press
+    if (deltaX > 10 || deltaY > 10) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+
+    // Prevent the subsequent "click" event if a long press just happened
+    if (isLongPressActive.current) {
+      e.preventDefault();
+    }
   };
 
   const startEditing = (msg: any) => {
@@ -712,7 +713,8 @@ export function ChatWindow({
                       )}
                       <div
                         onContextMenu={(e) => handleContextMenu(e, msg)}
-                        onTouchStart={() => handleTouchStart(msg)}
+                        onTouchStart={(e) => handleTouchStart(e, msg)}
+                        onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                         className={`w-full flex relative group transition-all duration-300 ${
                           isMe ? "flex-row-reverse" : "flex-row"
@@ -1059,55 +1061,123 @@ export function ChatWindow({
                     {chat.bio || "No information shared."}
                   </p>
                 </div>
-                {/* Media and shared elements would continue here */}
+
+                {/* Shared Media Section */}
+                {sharedMedia.length > 0 && (
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <ImageIcon size={12} className="text-indigo-400" />
+                        <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                          Shared Media
+                        </h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                        {sharedMedia.length}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {sharedMedia.slice(0, 6).map((url, i) => (
+                        <div
+                          key={i}
+                          onClick={() => {
+                            setSelectedImage(url);
+                            setIsZoomed(true);
+                          }}
+                          className="aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/5 cursor-pointer hover:border-indigo-500/50 transition-all relative group/media"
+                        >
+                          <img
+                            src={url}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover/media:scale-110"
+                            alt=""
+                          />
+                          <div className="absolute inset-0 bg-indigo-600/20 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center">
+                            <Download
+                              size={14}
+                              className="text-white"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadImage(url);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Profile Picture Zoom Overlay */}
+      {/* Profile Picture / Shared Media Zoom Overlay */}
       <AnimatePresence>
-        {isZoomed && (
+        {(isZoomed || selectedImage) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIsZoomed(false)}
-            className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-8"
+            onClick={() => {
+              setIsZoomed(false);
+              setSelectedImage(null);
+            }}
+            className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-8"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-lg w-full aspect-square rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+              className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center"
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
-              <button
-                onClick={() => setIsZoomed(false)}
-                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/40 text-white/80 hover:text-white backdrop-blur-md transition-all"
-              >
-                <X size={20} />
-              </button>
-              {chat.avatar_url ? (
-                <img
-                  src={chat.avatar_url}
-                  className="w-full h-full object-cover"
-                  alt={chat.name}
-                />
-              ) : (
-                <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-7xl font-bold text-white">
-                  {chat.name?.charAt(0)}
+              <div className="absolute top-[-50px] right-0 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    if (selectedImage || chat.avatar_url) {
+                      downloadImage(selectedImage || chat.avatar_url);
+                    }
+                  }}
+                  className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md border border-white/10"
+                >
+                  <Download size={20} />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsZoomed(false);
+                    setSelectedImage(null);
+                  }}
+                  className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md border border-white/10"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-[#1a1d23]">
+                {selectedImage || chat.avatar_url ? (
+                  <img
+                    src={selectedImage || chat.avatar_url}
+                    className="w-full h-full object-contain"
+                    alt="Zoomed"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-7xl font-bold text-white">
+                    {chat.name?.charAt(0)}
+                  </div>
+                )}
+              </div>
+
+              {!selectedImage && (
+                <div className="absolute bottom-6 left-6 right-6 p-6 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    {chat.name}
+                  </h3>
+                  <p className="text-zinc-400 text-sm">
+                    {isOnline ? "Active Now" : "Offline"}
+                  </p>
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/40 to-transparent">
-                <h3 className="text-2xl font-bold text-white mb-1">
-                  {chat.name}
-                </h3>
-                <p className="text-zinc-400 text-sm">
-                  {isOnline ? "Active Now" : "Offline"}
-                </p>
-              </div>
             </motion.div>
           </motion.div>
         )}
