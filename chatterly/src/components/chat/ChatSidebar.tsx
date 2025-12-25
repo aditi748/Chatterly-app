@@ -42,7 +42,7 @@ export function ChatSidebar({
 
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
-  const isLongPress = useRef(false);
+  const isLocked = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isEditingName, setIsEditingName] = useState(false);
@@ -93,28 +93,23 @@ export function ChatSidebar({
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !currentUserId) return;
-
     try {
       setIsUploading(true);
       const fileExt = file.name.split(".").pop();
       const fileName = `${currentUserId}-${Math.random()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
-
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file);
-
       if (uploadError) throw uploadError;
 
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl })
         .eq("id", currentUserId);
-
       if (updateError) throw updateError;
       if (onRefresh) onRefresh();
     } catch (error) {
@@ -128,15 +123,15 @@ export function ChatSidebar({
     if (profile && profile[field] === value) return;
     try {
       if (!currentUserId) return;
+
       if (field === "full_name") setEditedName(value);
       if (field === "bio") setEditedBio(value);
-
       const { error } = await supabase
         .from("profiles")
         .update({ [field]: value })
         .eq("id", currentUserId);
-
       if (error) throw error;
+
       if (onRefresh) onRefresh();
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -163,10 +158,9 @@ export function ChatSidebar({
   const handleTouchStart = (e: React.TouchEvent, chatId: string) => {
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-    isLongPress.current = false;
-
+    // DO NOT reset isLocked here, we need it to persist until the ghost click finishes
     longPressTimer.current = setTimeout(() => {
-      isLongPress.current = true;
+      isLocked.current = true; // Mark that a long press happened
       toggleSelection(chatId);
       if (window.navigator.vibrate) window.navigator.vibrate(50);
     }, 600);
@@ -177,7 +171,6 @@ export function ChatSidebar({
     const touch = e.touches[0];
     const moveX = Math.abs(touch.clientX - touchStartPos.current.x);
     const moveY = Math.abs(touch.clientY - touchStartPos.current.y);
-
     if (moveX > 10 || moveY > 10) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current);
@@ -186,21 +179,13 @@ export function ChatSidebar({
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent, chatId: string) => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
-
-      // If the timer was still active, it wasn't a long press
-      if (!isLongPress.current) {
-        if (selectedChatIds.length > 0) {
-          toggleSelection(chatId);
-        } else {
-          onSelectChat(chatId);
-        }
-      }
     }
-    touchStartPos.current = null;
+    // We keep isLocked as true if the timer finished.
+    // The onClick event (which fires after this) will consume it and reset it.
   };
 
   const handleBulkArchive = async () => {
@@ -215,16 +200,17 @@ export function ChatSidebar({
       const updates = selectedChatIds.map(async (chatId) => {
         const localChat = chats.find((c: any) => c.id === chatId);
         if (!localChat) return;
+
         const column =
           localChat.user1_id === currentUserId
             ? "user1_archived"
             : "user2_archived";
+
         return supabase
           .from("conversations")
           .update({ [column]: shouldArchive })
           .eq("id", chatId);
       });
-
       await Promise.all(updates);
       setSelectedChatIds([]);
       if (onRefresh) onRefresh();
@@ -241,19 +227,24 @@ export function ChatSidebar({
       if (selectedId && selectedChatIds.includes(selectedId)) {
         onSelectChat(null);
       }
+
       const deleteTime = new Date().toISOString();
       const updates = selectedChatIds.map(async (chatId) => {
         const localChat = chats.find((c: any) => c.id === chatId);
         if (!localChat) return;
+
         const isUser1 = localChat.user1_id === currentUserId;
         const deleteCol = isUser1 ? "user1_deleted_at" : "user2_deleted_at";
         const hideCol = isUser1 ? "user1_is_hidden" : "user2_is_hidden";
+
         return supabase
           .from("conversations")
-          .update({ [deleteCol]: deleteTime, [hideCol]: true })
+          .update({
+            [deleteCol]: deleteTime,
+            [hideCol]: true,
+          })
           .eq("id", chatId);
       });
-
       await Promise.all(updates);
       setSelectedChatIds([]);
       if (onRefresh) onRefresh();
@@ -296,19 +287,23 @@ export function ChatSidebar({
       ? chat.user1_archived
       : chat.user2_archived;
   }).length;
-
   const filteredChats = chats.filter((chat: any) => {
     const matchesSearch = chat.name
       ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
+
     const isUser1 = chat.user1_id === currentUserId;
     const isActuallyArchived = isUser1
       ? chat.user1_archived
       : chat.user2_archived;
+
     const isHiddenForMe = isUser1 ? chat.user1_is_hidden : chat.user2_is_hidden;
+
     if (isHiddenForMe) return false;
+
     const matchesView =
       view === "archived" ? !!isActuallyArchived : !isActuallyArchived;
+
     return matchesSearch && matchesView;
   });
 
@@ -381,6 +376,7 @@ export function ChatSidebar({
                     Chatterly
                   </h1>
                 </div>
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -422,6 +418,7 @@ export function ChatSidebar({
                     </span>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={handleBulkArchive}
@@ -524,11 +521,14 @@ export function ChatSidebar({
                       handleTouchStart(e, chat.id)
                     }
                     onTouchMove={handleTouchMove}
-                    onTouchEnd={(e: React.TouchEvent) =>
-                      handleTouchEnd(e, chat.id)
-                    }
+                    onTouchEnd={handleTouchEnd}
                     onClick={() => {
-                      // Only use onClick for non-touch devices or as a fallback
+                      // CRITICAL FIX: If we just finished a long press, skip this click
+                      if (isLocked.current) {
+                        isLocked.current = false;
+                        return;
+                      }
+
                       if (selectedChatIds.length > 0) {
                         toggleSelection(chat.id);
                       } else {
@@ -576,6 +576,7 @@ export function ChatSidebar({
                         />
                       )}
                     </div>
+
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex justify-between items-center mb-0.5">
                         <span
@@ -662,7 +663,6 @@ export function ChatSidebar({
         </div>
       </div>
 
-      {/* Profile and Zoom Modals are unchanged below */}
       <AnimatePresence>
         {showProfileModal && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -673,6 +673,7 @@ export function ChatSidebar({
               onClick={() => !isUploading && setShowProfileModal(false)}
               className="absolute inset-0 bg-black/70 backdrop-blur-xl"
             />
+
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -680,6 +681,7 @@ export function ChatSidebar({
               className="relative w-full max-w-[340px] bg-[#1a1b1e] border border-white/10 rounded-[28px] shadow-[0_32px_80px_rgba(0,0,0,0.7)] overflow-hidden"
             >
               <div className="h-24 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative">
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                 <button
                   onClick={() => setShowProfileModal(false)}
                   className="absolute top-3 right-3 p-1.5 bg-black/10 hover:bg-black/30 text-white rounded-full transition-all backdrop-blur-md"
@@ -687,6 +689,7 @@ export function ChatSidebar({
                   <X size={16} />
                 </button>
               </div>
+
               <div className="px-6 pb-8 -mt-10 relative">
                 <div className="relative inline-block mb-3">
                   <div
@@ -714,7 +717,7 @@ export function ChatSidebar({
                     )}
                   </div>
                   <button
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
                     }}
@@ -730,6 +733,7 @@ export function ChatSidebar({
                     className="hidden"
                   />
                 </div>
+
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-1 px-1">
@@ -738,8 +742,9 @@ export function ChatSidebar({
                       </span>
                       <button
                         onClick={() => {
-                          if (isEditingName)
+                          if (isEditingName) {
                             updateProfile("full_name", editedName);
+                          }
                           setIsEditingName(!isEditingName);
                         }}
                         className="text-indigo-400 text-[10px] font-semibold hover:underline"
@@ -747,12 +752,17 @@ export function ChatSidebar({
                         {isEditingName ? "Save" : "Edit"}
                       </button>
                     </div>
+
                     {isEditingName ? (
                       <input
                         value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setEditedName(e.target.value)
+                        }
                         autoFocus
-                        onKeyDown={(e) => {
+                        onKeyDown={(
+                          e: React.KeyboardEvent<HTMLInputElement>
+                        ) => {
                           if (e.key === "Enter") {
                             updateProfile("full_name", editedName);
                             setIsEditingName(false);
@@ -789,6 +799,7 @@ export function ChatSidebar({
                       </div>
                     )}
                   </div>
+
                   <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5 group">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
@@ -796,7 +807,9 @@ export function ChatSidebar({
                       </span>
                       <button
                         onClick={() => {
-                          if (isEditingBio) updateProfile("bio", editedBio);
+                          if (isEditingBio) {
+                            updateProfile("bio", editedBio);
+                          }
                           setIsEditingBio(!isEditingBio);
                         }}
                       >
@@ -815,7 +828,9 @@ export function ChatSidebar({
                     {isEditingBio ? (
                       <textarea
                         value={editedBio}
-                        onChange={(e) => setEditedBio(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                          setEditedBio(e.target.value)
+                        }
                         className="w-full bg-black/20 rounded-lg p-2.5 text-xs text-zinc-300 outline-none border border-indigo-500/30 resize-none h-16"
                       />
                     ) : (
@@ -824,6 +839,7 @@ export function ChatSidebar({
                       </p>
                     )}
                   </div>
+
                   <div className="flex items-center gap-2.5 px-3 py-2.5 bg-white/[0.02] rounded-xl border border-white/5">
                     <Mail size={12} className="text-zinc-500 flex-shrink-0" />
                     <div className="flex flex-col min-w-0">
@@ -835,6 +851,7 @@ export function ChatSidebar({
                       </span>
                     </div>
                   </div>
+
                   <div className="pt-1">
                     <button
                       onClick={handleSignOut}

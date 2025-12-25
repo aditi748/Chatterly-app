@@ -77,6 +77,28 @@ export function ChatWindow({
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
   const isLongPressActive = useRef(false);
 
+  // --- DOWNLOAD FUNCTION ---
+  const downloadImage = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      const fileName = url.split("/").pop()?.split("?")[0] || "chat-image";
+      link.download = fileName;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed:", err);
+      window.open(url, "_blank");
+    }
+  };
+
   const getDeleteTime = useCallback(() => {
     return chat.user1_id === currentUser?.id
       ? chat.user1_deleted_at
@@ -423,11 +445,8 @@ export function ChatWindow({
     setContextMenu({ x: e.clientX, y: e.clientY, msg });
   };
 
-  // Fixed Long Press Logic with Movement Threshold
   const handleTouchStart = (e: React.TouchEvent, msg: any) => {
     if (msg.user_id !== currentUser?.id) return;
-
-    // Record starting position
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
     isLongPressActive.current = false;
@@ -439,19 +458,15 @@ export function ChatWindow({
         y: window.innerHeight / 2 - 50,
         msg,
       });
-      // Vibrate if supported
       if (navigator.vibrate) navigator.vibrate(50);
-    }, 700); // Higher duration for intentionality
+    }, 700);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!touchStartPos.current || !longPressTimer.current) return;
-
     const touch = e.touches[0];
     const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
     const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
-
-    // If moved more than 10px, it's a scroll, not a long press
     if (deltaX > 10 || deltaY > 10) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -463,8 +478,6 @@ export function ChatWindow({
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-
-    // Prevent the subsequent "click" event if a long press just happened
     if (isLongPressActive.current) {
       e.preventDefault();
     }
@@ -795,24 +808,31 @@ export function ChatWindow({
                             }`}
                           >
                             {msg.type === "image" ? (
-                              <div
-                                className="relative group/img cursor-zoom-in"
-                                onClick={() => setSelectedImage(msg.text)}
-                              >
+                              <div className="relative group/img cursor-zoom-in">
                                 <img
                                   src={msg.text}
+                                  onClick={() => setSelectedImage(msg.text)}
                                   className={`rounded-xl max-h-48 md:max-h-64 w-auto object-cover transition-all duration-300 group-hover/img:brightness-90 ${
                                     isSelected ? "brightness-50" : ""
                                   }`}
                                   alt="Shared"
                                 />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
-                                  <div className="p-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
-                                    <Maximize2
-                                      size={18}
-                                      className="text-white"
-                                    />
-                                  </div>
+                                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      downloadImage(msg.text);
+                                    }}
+                                    className="p-2 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
+                                  >
+                                    <Download size={16} />
+                                  </button>
+                                  <button
+                                    onClick={() => setSelectedImage(msg.text)}
+                                    className="p-2 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
+                                  >
+                                    <Maximize2 size={16} />
+                                  </button>
                                 </div>
                               </div>
                             ) : (
@@ -1061,7 +1081,6 @@ export function ChatWindow({
                     {chat.bio || "No information shared."}
                   </p>
                 </div>
-
                 {/* Shared Media Section */}
                 {sharedMedia.length > 0 && (
                   <div className="p-6">
@@ -1080,26 +1099,27 @@ export function ChatWindow({
                       {sharedMedia.slice(0, 6).map((url, i) => (
                         <div
                           key={i}
-                          onClick={() => {
-                            setSelectedImage(url);
-                            setIsZoomed(true);
-                          }}
                           className="aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/5 cursor-pointer hover:border-indigo-500/50 transition-all relative group/media"
                         >
                           <img
                             src={url}
+                            onClick={() => {
+                              setSelectedImage(url);
+                              setIsZoomed(true);
+                            }}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover/media:scale-110"
                             alt=""
                           />
                           <div className="absolute inset-0 bg-indigo-600/20 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center">
-                            <Download
-                              size={14}
-                              className="text-white"
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 downloadImage(url);
                               }}
-                            />
+                              className="p-1.5 rounded-md bg-black/40 backdrop-blur-sm text-white hover:bg-black/60"
+                            >
+                              <Download size={14} />
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -1112,78 +1132,51 @@ export function ChatWindow({
         )}
       </AnimatePresence>
 
-      {/* Profile Picture / Shared Media Zoom Overlay */}
       <AnimatePresence>
         {(isZoomed || selectedImage) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => {
-              setIsZoomed(false);
-              setSelectedImage(null);
-            }}
             className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-8"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center"
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="relative max-w-full max-h-full flex flex-col items-center gap-4"
             >
-              <div className="absolute top-[-50px] right-0 flex items-center gap-3">
+              <img
+                src={selectedImage || chat.avatar_url}
+                className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/5"
+                alt="Zoomed View"
+              />
+              <div className="flex gap-4">
                 <button
-                  onClick={() => {
-                    if (selectedImage || chat.avatar_url) {
-                      downloadImage(selectedImage || chat.avatar_url);
-                    }
-                  }}
-                  className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md border border-white/10"
+                  onClick={() =>
+                    downloadImage(selectedImage || chat.avatar_url)
+                  }
+                  className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
                 >
-                  <Download size={20} />
+                  <Download size={18} />
+                  Download
                 </button>
                 <button
                   onClick={() => {
                     setIsZoomed(false);
                     setSelectedImage(null);
                   }}
-                  className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md border border-white/10"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-white/5 text-white rounded-xl font-bold hover:bg-white/10 border border-white/5 transition-all"
                 >
-                  <X size={20} />
+                  <X size={18} />
+                  Close
                 </button>
               </div>
-
-              <div className="w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-[#1a1d23]">
-                {selectedImage || chat.avatar_url ? (
-                  <img
-                    src={selectedImage || chat.avatar_url}
-                    className="w-full h-full object-contain"
-                    alt="Zoomed"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-7xl font-bold text-white">
-                    {chat.name?.charAt(0)}
-                  </div>
-                )}
-              </div>
-
-              {!selectedImage && (
-                <div className="absolute bottom-6 left-6 right-6 p-6 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
-                  <h3 className="text-xl font-bold text-white mb-1">
-                    {chat.name}
-                  </h3>
-                  <p className="text-zinc-400 text-sm">
-                    {isOnline ? "Active Now" : "Offline"}
-                  </p>
-                </div>
-              )}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Context Menu for Editing */}
       <AnimatePresence>
         {contextMenu && (
           <motion.div
@@ -1210,6 +1203,18 @@ export function ChatWindow({
             >
               <Check size={14} className="text-emerald-400" />
               Select
+            </button>
+            <div className="h-px bg-white/5 my-1" />
+            <button
+              onClick={() => {
+                setSelectedIds([contextMenu.msg.id]);
+                handleDeleteMessages();
+                setContextMenu(null);
+              }}
+              className="w-full px-4 py-2 flex items-center gap-2.5 text-red-400 hover:bg-red-500/10 transition-colors text-[11px] font-bold uppercase tracking-widest"
+            >
+              <Trash2 size={14} />
+              Delete
             </button>
           </motion.div>
         )}
