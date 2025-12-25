@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   Search,
@@ -19,6 +20,7 @@ import {
   ShieldCheck,
   Trash2,
   Circle,
+  AlertCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence, Transition } from "framer-motion";
@@ -39,12 +41,14 @@ export function ChatSidebar({
   const [selectedChatIds, setSelectedChatIds] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [showZoomedAvatar, setShowZoomedAvatar] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Interaction Refs
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
-  const isLocked = useRef(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isLongPressActive = useRef(false);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [editedName, setEditedName] = useState("");
@@ -98,18 +102,22 @@ export function ChatSidebar({
       const fileExt = file.name.split(".").pop();
       const fileName = `${currentUserId}-${Math.random()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
+
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file);
+
       if (uploadError) throw uploadError;
 
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl })
         .eq("id", currentUserId);
+
       if (updateError) throw updateError;
       if (onRefresh) onRefresh();
     } catch (error) {
@@ -123,7 +131,6 @@ export function ChatSidebar({
     if (profile && profile[field] === value) return;
     try {
       if (!currentUserId) return;
-
       if (field === "full_name") setEditedName(value);
       if (field === "bio") setEditedBio(value);
       const { error } = await supabase
@@ -131,14 +138,9 @@ export function ChatSidebar({
         .update({ [field]: value })
         .eq("id", currentUserId);
       if (error) throw error;
-
       if (onRefresh) onRefresh();
     } catch (err) {
-      console.error("Error updating profile:", err);
-      if (profile) {
-        if (field === "full_name") setEditedName(profile.full_name);
-        if (field === "bio") setEditedBio(profile.bio);
-      }
+      console.error(err);
     }
   };
 
@@ -158,12 +160,13 @@ export function ChatSidebar({
   const handleTouchStart = (e: React.TouchEvent, chatId: string) => {
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-    // DO NOT reset isLocked here, we need it to persist until the ghost click finishes
+    isLongPressActive.current = false;
+
     longPressTimer.current = setTimeout(() => {
-      isLocked.current = true; // Mark that a long press happened
+      isLongPressActive.current = true;
       toggleSelection(chatId);
-      if (window.navigator.vibrate) window.navigator.vibrate(50);
-    }, 600);
+      if (window.navigator.vibrate) window.navigator.vibrate(60);
+    }, 800);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -171,11 +174,9 @@ export function ChatSidebar({
     const touch = e.touches[0];
     const moveX = Math.abs(touch.clientX - touchStartPos.current.x);
     const moveY = Math.abs(touch.clientY - touchStartPos.current.y);
-    if (moveX > 10 || moveY > 10) {
-      if (longPressTimer.current) {
-        clearTimeout(longPressTimer.current);
-        longPressTimer.current = null;
-      }
+    if (moveX > 15 || moveY > 15) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
     }
   };
 
@@ -184,90 +185,74 @@ export function ChatSidebar({
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-    // We keep isLocked as true if the timer finished.
-    // The onClick event (which fires after this) will consume it and reset it.
+    if (isLongPressActive.current) {
+      e.preventDefault();
+    }
+  };
+
+  const handleItemClick = (chatId: string) => {
+    if (selectedChatIds.length > 0) {
+      toggleSelection(chatId);
+    } else {
+      onSelectChat(chatId);
+    }
   };
 
   const handleBulkArchive = async () => {
     if (selectedChatIds.length === 0) return;
     const shouldArchive = view === "active";
-
     try {
-      if (selectedId && selectedChatIds.includes(selectedId)) {
+      if (selectedId && selectedChatIds.includes(selectedId))
         onSelectChat(null);
-      }
-
       const updates = selectedChatIds.map(async (chatId) => {
         const localChat = chats.find((c: any) => c.id === chatId);
         if (!localChat) return;
-
-        const column =
+        const col =
           localChat.user1_id === currentUserId
             ? "user1_archived"
             : "user2_archived";
-
         return supabase
           .from("conversations")
-          .update({ [column]: shouldArchive })
+          .update({ [col]: shouldArchive })
           .eq("id", chatId);
       });
       await Promise.all(updates);
       setSelectedChatIds([]);
       if (onRefresh) onRefresh();
     } catch (err) {
-      console.error("Error archiving chats:", err);
+      console.error(err);
     }
   };
 
   const handleBulkDelete = async () => {
     if (selectedChatIds.length === 0) return;
-    if (!confirm("Delete selected chats? This will clear history for you."))
-      return;
     try {
-      if (selectedId && selectedChatIds.includes(selectedId)) {
+      if (selectedId && selectedChatIds.includes(selectedId))
         onSelectChat(null);
-      }
-
-      const deleteTime = new Date().toISOString();
+      const time = new Date().toISOString();
       const updates = selectedChatIds.map(async (chatId) => {
         const localChat = chats.find((c: any) => c.id === chatId);
         if (!localChat) return;
-
-        const isUser1 = localChat.user1_id === currentUserId;
-        const deleteCol = isUser1 ? "user1_deleted_at" : "user2_deleted_at";
-        const hideCol = isUser1 ? "user1_is_hidden" : "user2_is_hidden";
-
+        const isU1 = localChat.user1_id === currentUserId;
+        const delCol = isU1 ? "user1_deleted_at" : "user2_deleted_at";
+        const hideCol = isU1 ? "user1_is_hidden" : "user2_is_hidden";
         return supabase
           .from("conversations")
-          .update({
-            [deleteCol]: deleteTime,
-            [hideCol]: true,
-          })
+          .update({ [delCol]: time, [hideCol]: true })
           .eq("id", chatId);
       });
       await Promise.all(updates);
       setSelectedChatIds([]);
+      setShowDeleteConfirm(false);
       if (onRefresh) onRefresh();
     } catch (err) {
-      console.error("Error deleting chats:", err);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      localStorage.clear();
-      window.location.href = "/auth";
-    } catch (error) {
-      console.error("Sign out failed", error);
-      window.location.href = "/auth";
+      console.error(err);
     }
   };
 
   const formatTime = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "";
     const now = new Date();
     if (date.toDateString() === now.toDateString()) {
       return date.toLocaleTimeString([], {
@@ -282,32 +267,23 @@ export function ChatSidebar({
     return date.toLocaleDateString([], { day: "2-digit", month: "2-digit" });
   };
 
+  const filteredChats = chats.filter((chat: any) => {
+    const matchesSearch = chat.name
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const isU1 = chat.user1_id === currentUserId;
+    const isArchived = isU1 ? chat.user1_archived : chat.user2_archived;
+    const isHidden = isU1 ? chat.user1_is_hidden : chat.user2_is_hidden;
+    if (isHidden) return false;
+    const matchesView = view === "archived" ? !!isArchived : !isArchived;
+    return matchesSearch && matchesView;
+  });
+
   const archivedCount = chats.filter((chat: any) => {
     return chat.user1_id === currentUserId
       ? chat.user1_archived
       : chat.user2_archived;
   }).length;
-  const filteredChats = chats.filter((chat: any) => {
-    const matchesSearch = chat.name
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    const isUser1 = chat.user1_id === currentUserId;
-    const isActuallyArchived = isUser1
-      ? chat.user1_archived
-      : chat.user2_archived;
-
-    const isHiddenForMe = isUser1 ? chat.user1_is_hidden : chat.user2_is_hidden;
-
-    if (isHiddenForMe) return false;
-
-    const matchesView =
-      view === "archived" ? !!isActuallyArchived : !isActuallyArchived;
-
-    return matchesSearch && matchesView;
-  });
-
-  const isUserOnline = presence && !!presence[currentUserId];
 
   return (
     <div className="flex flex-col h-full bg-[#1e2229] border-r border-white/5 w-full select-none relative overflow-hidden">
@@ -317,117 +293,62 @@ export function ChatSidebar({
       </div>
 
       <div className="relative z-10 flex flex-col h-full">
-        <div className="px-5 pt-8 md:pt-10 pb-4 h-[90px] md:h-[100px] flex items-center justify-between overflow-hidden">
+        <div className="px-5 pt-8 md:pt-10 pb-4 h-[90px] md:h-[100px] flex items-center justify-between">
           <AnimatePresence mode="popLayout">
             {selectedChatIds.length === 0 ? (
               <motion.div
-                key="default-header"
+                key="def"
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 10, opacity: 0 }}
-                transition={fastTransition}
                 className="flex items-center justify-between w-full"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden shadow-lg shadow-indigo-500/20 relative group">
-                    <svg
-                      viewBox="0 0 100 100"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-full h-full"
-                    >
-                      <rect
-                        width="100"
-                        height="100"
-                        rx="22"
-                        fill="url(#sidebar-logo-grad)"
-                      />
-                      <text
-                        x="50%"
-                        y="53%"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill="white"
-                        fontSize="55"
-                        fontWeight="bold"
-                        fontFamily="Inter, system-ui, sans-serif"
-                        style={{
-                          filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.2))",
-                        }}
-                      >
-                        C
-                      </text>
-                      <defs>
-                        <linearGradient
-                          id="sidebar-logo-grad"
-                          x1="0"
-                          y1="0"
-                          x2="100"
-                          y2="100"
-                          gradientUnits="userSpaceOnUse"
-                        >
-                          <stop stopColor="#6366f1" />
-                          <stop offset="1" stopColor="#4338ca" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center font-bold text-white shadow-lg">
+                    C
                   </div>
                   <h1 className="text-lg font-black tracking-tight text-white">
                     Chatterly
                   </h1>
                 </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => setShowProfileModal(true)}
-                  className="w-10 h-10 rounded-2xl border border-white/10 p-0.5 bg-white/5 overflow-hidden transition-transform shadow-xl relative"
+                  className="w-10 h-10 rounded-2xl border border-white/10 bg-white/5 overflow-hidden"
                 >
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
-                      className="w-full h-full rounded-[14px] object-cover"
+                      className="w-full h-full object-cover"
                       alt=""
                     />
                   ) : (
                     <User size={18} className="m-auto text-zinc-400" />
                   )}
-                </motion.button>
+                </button>
               </motion.div>
             ) : (
               <motion.div
-                key="action-header"
+                key="act"
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                transition={fastTransition}
-                className="flex items-center justify-between w-full bg-[#252a33]/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 mb-2 shadow-2xl"
+                className="flex items-center justify-between w-full bg-[#252a33]/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2"
               >
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSelectedChatIds([])}
-                    className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                    title="Cancel selection"
+                    className="p-2 text-zinc-400 hover:text-white"
                   >
                     <X size={18} />
                   </button>
-                  <div className="h-4 w-[1px] bg-white/10 mx-1" />
-                  <div className="flex items-center justify-center px-1">
-                    <span className="text-indigo-500 font-bold text-sm">
-                      {selectedChatIds.length}
-                    </span>
-                  </div>
+                  <span className="text-indigo-500 font-bold text-sm px-1">
+                    {selectedChatIds.length}
+                  </span>
                 </div>
-
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={handleBulkArchive}
-                    className="p-2.5 bg-white/5 hover:bg-indigo-500 text-zinc-300 hover:text-white rounded-xl transition-all shadow-lg"
-                    title={
-                      view === "active"
-                        ? "Archive selected"
-                        : "Restore selected"
-                    }
+                    className="p-2.5 bg-white/5 hover:bg-indigo-500 text-zinc-300 hover:text-white rounded-xl"
                   >
                     {view === "active" ? (
                       <Archive size={18} />
@@ -436,9 +357,8 @@ export function ChatSidebar({
                     )}
                   </button>
                   <button
-                    onClick={handleBulkDelete}
-                    className="p-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all shadow-lg"
-                    title="Delete for me"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="p-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -451,43 +371,35 @@ export function ChatSidebar({
         <div className="px-4 mt-2 mb-4">
           <div className="relative group">
             <Search
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-500 transition-colors"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500"
               size={14}
             />
             <input
               value={searchTerm}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchTerm(e.target.value)
-              }
-              placeholder="Search conversations..."
-              className="w-full bg-[#252a33]/60 border border-white/5 rounded-2xl py-2.5 pl-10 pr-4 text-[12px] outline-none text-white focus:border-indigo-500/40 transition-all"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search..."
+              className="w-full bg-[#252a33]/60 border border-white/5 rounded-2xl py-2.5 pl-10 pr-4 text-[12px] text-white outline-none"
             />
           </div>
         </div>
 
         <div className="px-4 mb-4 flex gap-2">
           <button
-            onClick={() => {
-              setView("active");
-              setSelectedChatIds([]);
-            }}
-            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${
+            onClick={() => setView("active")}
+            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase ${
               view === "active"
-                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                : "bg-white/5 text-zinc-500 hover:bg-white/10"
+                ? "bg-indigo-500 text-white"
+                : "bg-white/5 text-zinc-500"
             }`}
           >
             Chats
           </button>
           <button
-            onClick={() => {
-              setView("archived");
-              setSelectedChatIds([]);
-            }}
-            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+            onClick={() => setView("archived")}
+            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase ${
               view === "archived"
-                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                : "bg-white/5 text-zinc-500 hover:bg-white/10"
+                ? "bg-indigo-500 text-white"
+                : "bg-white/5 text-zinc-500"
             }`}
           >
             Archived{" "}
@@ -497,172 +409,174 @@ export function ChatSidebar({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-10 space-y-1.5 custom-scrollbar relative z-10">
+        <div className="flex-1 overflow-y-auto px-2 pb-10 space-y-1.5 custom-scrollbar">
           <AnimatePresence initial={false}>
-            {filteredChats.length > 0 ? (
-              filteredChats.map((chat: any) => {
-                const isSelected = selectedId === chat.id;
-                const isMultiSelected = selectedChatIds.includes(chat.id);
-                const isOnline = presence && !!presence[chat.otherId];
-                const isMe = chat.last_msg_user_id === currentUserId;
-                const hasUnread = chat.unread_count > 0 && !isSelected && !isMe;
+            {filteredChats.map((chat: any) => {
+              const isSelected = selectedId === chat.id;
+              const isMulti = selectedChatIds.includes(chat.id);
+              const isOnline = presence && !!presence[chat.otherId];
+              const isMe = chat.last_msg_user_id === currentUserId;
+              const hasUnread = chat.unread_count > 0 && !isSelected && !isMe;
 
-                return (
-                  <motion.button
-                    layout
-                    key={chat.id}
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    onContextMenu={(e: React.MouseEvent) =>
-                      handleRightClick(e, chat.id)
-                    }
-                    onTouchStart={(e: React.TouchEvent) =>
-                      handleTouchStart(e, chat.id)
-                    }
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onClick={() => {
-                      // CRITICAL FIX: If we just finished a long press, skip this click
-                      if (isLocked.current) {
-                        isLocked.current = false;
-                        return;
-                      }
-
-                      if (selectedChatIds.length > 0) {
-                        toggleSelection(chat.id);
-                      } else {
-                        onSelectChat(chat.id);
-                      }
-                    }}
-                    className={`w-full flex items-center gap-3 p-3 rounded-[24px] transition-all border relative flex-shrink-0 ${
-                      isMultiSelected
-                        ? "bg-indigo-500/20 border-indigo-500/50"
-                        : isSelected
-                        ? "bg-gradient-to-r from-indigo-600 to-violet-600 border-white/20 shadow-xl"
-                        : "hover:bg-white/5 border-transparent text-zinc-300"
-                    }`}
-                  >
-                    <div className="relative flex-shrink-0">
-                      <div
-                        className={`w-12 h-12 rounded-[18px] overflow-hidden border ${
-                          isSelected ? "border-white/40" : "border-white/5"
+              return (
+                <motion.button
+                  layout
+                  key={chat.id}
+                  onContextMenu={(e) => handleRightClick(e, chat.id)}
+                  onTouchStart={(e) => handleTouchStart(e, chat.id)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onClick={() => handleItemClick(chat.id)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-[24px] transition-all border relative ${
+                    isMulti
+                      ? "bg-indigo-500/20 border-indigo-500/50"
+                      : isSelected
+                      ? "bg-gradient-to-r from-indigo-600 to-violet-600 border-white/20 shadow-xl"
+                      : "hover:bg-white/5 border-transparent text-zinc-300"
+                  }`}
+                >
+                  <div className="relative flex-shrink-0">
+                    <div
+                      className={`w-12 h-12 rounded-[18px] overflow-hidden border ${
+                        isSelected ? "border-white/40" : "border-white/5"
+                      }`}
+                    >
+                      {chat.avatar_url ? (
+                        <img
+                          src={chat.avatar_url}
+                          className="w-full h-full object-cover"
+                          alt=""
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center font-bold text-sm bg-[#2d3442] text-zinc-400">
+                          {chat.name?.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    {isMulti && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center border-2 border-[#1e2229]">
+                        <Check size={10} className="text-white" />
+                      </div>
+                    )}
+                    {isOnline && !isMulti && (
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[2.5px] rounded-full ${
+                          isSelected ? "border-indigo-600" : "border-[#1e2229]"
+                        }`}
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex justify-between items-center mb-0.5">
+                      <span
+                        className={`text-[13.5px] truncate font-bold ${
+                          isSelected ? "text-white" : "text-slate-100"
                         }`}
                       >
-                        {chat.avatar_url ? (
-                          <img
-                            src={chat.avatar_url}
-                            className="w-full h-full object-cover"
-                            alt=""
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center font-bold text-sm bg-[#2d3442] text-zinc-400">
-                            {chat.name?.charAt(0)}
-                          </div>
-                        )}
-                      </div>
-                      {isMultiSelected && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center border-2 border-[#1e2229] shadow-lg">
-                          <Check size={10} className="text-white font-bold" />
-                        </div>
-                      )}
-                      {isOnline && !isMultiSelected && (
-                        <span
-                          className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[2.5px] rounded-full ${
-                            isSelected
-                              ? "border-indigo-600"
-                              : "border-[#1e2229]"
-                          }`}
-                        />
-                      )}
+                        {chat.name}
+                      </span>
+                      <span
+                        className={`text-[10px] ${
+                          isSelected ? "text-indigo-100" : "text-zinc-500"
+                        }`}
+                      >
+                        {formatTime(chat.last_at)}
+                      </span>
                     </div>
-
-                    <div className="flex-1 min-w-0 text-left">
-                      <div className="flex justify-between items-center mb-0.5">
-                        <span
-                          className={`text-[13.5px] truncate font-bold ${
-                            isSelected ? "text-white" : "text-slate-100"
-                          }`}
-                        >
-                          {chat.name}
-                        </span>
-                        <span
-                          className={`text-[10px] ${
-                            isSelected ? "text-indigo-100" : "text-zinc-500"
-                          }`}
-                        >
-                          {formatTime(chat.last_at)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1 min-w-0 flex-1">
-                          {isMe && (
-                            <span
-                              className={
-                                isSelected ? "text-white" : "text-blue-500"
-                              }
-                            >
-                              {chat.last_msg_is_read ? (
-                                <CheckCheck
-                                  size={14}
-                                  className="drop-shadow-[0_0_3px_rgba(59,130,246,0.5)]"
-                                />
-                              ) : (
-                                <Check size={14} className="text-zinc-500" />
-                              )}
-                            </span>
-                          )}
-                          <p
-                            className={`text-[11.5px] truncate ${
-                              isSelected
-                                ? "text-indigo-100/80"
-                                : "text-zinc-500"
-                            }`}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1 min-w-0 flex-1">
+                        {isMe && (
+                          <span
+                            className={
+                              isSelected ? "text-white" : "text-blue-500"
+                            }
                           >
-                            {chat.last_msg === "shared an image" ? (
-                              <span className="flex items-center gap-1">
-                                <ImageIcon size={12} /> Photo
-                              </span>
+                            {chat.last_msg_is_read ? (
+                              <CheckCheck size={14} />
                             ) : (
-                              chat.last_msg || "New chat"
+                              <Check size={14} className="text-zinc-500" />
                             )}
-                          </p>
-                        </div>
-                        {hasUnread && (
-                          <div className="w-2 h-2 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/50" />
+                          </span>
                         )}
+                        <p
+                          className={`text-[11.5px] truncate ${
+                            isSelected ? "text-indigo-100/80" : "text-zinc-500"
+                          }`}
+                        >
+                          {chat.last_msg || "New chat"}
+                        </p>
                       </div>
+                      {hasUnread && (
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                      )}
                     </div>
-                  </motion.button>
-                );
-              })
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 py-20">
-                <MessageSquarePlus size={40} className="mb-4" />
-                <p className="text-xs">No conversations found</p>
-              </div>
-            )}
+                  </div>
+                </motion.button>
+              );
+            })}
           </AnimatePresence>
         </div>
 
         <div className="absolute bottom-6 right-6 z-[100]">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="p-1 rounded-[22px] bg-[#1e2229]/40 backdrop-blur-md border border-white/10"
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onNewChat}
+            className="w-12 h-12 bg-indigo-500 text-white rounded-[18px] flex items-center justify-center shadow-xl border border-white/20"
           >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onNewChat}
-              className="w-11 h-11 bg-indigo-500 text-white rounded-[18px] flex items-center justify-center shadow-[0_8px_20px_rgba(0,0,0,0.4)] shadow-indigo-500/30 border border-white/20"
-            >
-              <Plus size={22} strokeWidth={3} />
-            </motion.button>
-          </motion.div>
+            <Plus size={24} strokeWidth={3} />
+          </motion.button>
         </div>
       </div>
 
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteConfirm(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-[320px] bg-[#1a1b1e] border border-white/10 rounded-[28px] p-6 shadow-2xl text-center"
+            >
+              <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <AlertCircle size={32} className="text-red-500" />
+              </div>
+              <h3 className="text-white font-bold text-lg mb-2">
+                Delete Chats?
+              </h3>
+              <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
+                Are you sure? This will remove {selectedChatIds.length}{" "}
+                conversation{selectedChatIds.length > 1 ? "s" : ""} from your
+                list. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-zinc-300 font-bold text-xs uppercase tracking-widest rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-red-500/20"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Profile Modal */}
       <AnimatePresence>
         {showProfileModal && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -673,35 +587,30 @@ export function ChatSidebar({
               onClick={() => !isUploading && setShowProfileModal(false)}
               className="absolute inset-0 bg-black/70 backdrop-blur-xl"
             />
-
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 30 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 30 }}
-              className="relative w-full max-w-[340px] bg-[#1a1b1e] border border-white/10 rounded-[28px] shadow-[0_32px_80px_rgba(0,0,0,0.7)] overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full max-w-[340px] bg-[#1a1b1e] border border-white/10 rounded-[28px] shadow-2xl overflow-hidden pb-8"
             >
-              <div className="h-24 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+              <div className="h-24 bg-gradient-to-br from-indigo-600 to-violet-600 relative">
                 <button
                   onClick={() => setShowProfileModal(false)}
-                  className="absolute top-3 right-3 p-1.5 bg-black/10 hover:bg-black/30 text-white rounded-full transition-all backdrop-blur-md"
+                  className="absolute top-3 right-3 p-1.5 bg-black/10 text-white rounded-full"
                 >
                   <X size={16} />
                 </button>
               </div>
-
-              <div className="px-6 pb-8 -mt-10 relative">
+              <div className="px-6 -mt-10 relative">
                 <div className="relative inline-block mb-3">
                   <div
                     onClick={() =>
                       profile?.avatar_url && setShowZoomedAvatar(true)
                     }
-                    className={`w-20 h-20 rounded-[24px] border-[4px] border-[#1a1b1e] bg-[#242529] overflow-hidden shadow-2xl relative ${
-                      profile?.avatar_url ? "cursor-zoom-in" : ""
-                    }`}
+                    className="w-20 h-20 rounded-[24px] border-[4px] border-[#1a1b1e] bg-[#242529] overflow-hidden shadow-2xl relative"
                   >
                     {isUploading ? (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <Loader2 className="animate-spin text-white size-5" />
                       </div>
                     ) : profile?.avatar_url ? (
@@ -711,17 +620,14 @@ export function ChatSidebar({
                         alt=""
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-2xl font-black text-indigo-400 bg-indigo-500/10">
+                      <div className="w-full h-full flex items-center justify-center text-2xl font-black text-indigo-400">
                         {profile?.full_name?.charAt(0)}
                       </div>
                     )}
                   </div>
                   <button
-                    onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    className="absolute bottom-0 -right-1 p-1.5 bg-indigo-500 text-white rounded-lg shadow-xl hover:bg-indigo-600 transition-all border border-white/10 active:scale-95 z-10"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 -right-1 p-1.5 bg-indigo-500 text-white rounded-lg shadow-xl"
                   >
                     <Camera size={12} />
                   </button>
@@ -733,134 +639,85 @@ export function ChatSidebar({
                     className="hidden"
                   />
                 </div>
-
                 <div className="space-y-4">
                   <div>
-                    <div className="flex items-center justify-between mb-1 px-1">
+                    <div className="flex items-center justify-between mb-1">
                       <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
-                        Profile
+                        Name
                       </span>
                       <button
                         onClick={() => {
-                          if (isEditingName) {
+                          if (isEditingName)
                             updateProfile("full_name", editedName);
-                          }
                           setIsEditingName(!isEditingName);
                         }}
-                        className="text-indigo-400 text-[10px] font-semibold hover:underline"
+                        className="text-indigo-400 text-[10px] font-semibold"
                       >
                         {isEditingName ? "Save" : "Edit"}
                       </button>
                     </div>
-
                     {isEditingName ? (
                       <input
                         value={editedName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setEditedName(e.target.value)
-                        }
+                        onChange={(e) => setEditedName(e.target.value)}
                         autoFocus
-                        onKeyDown={(
-                          e: React.KeyboardEvent<HTMLInputElement>
-                        ) => {
-                          if (e.key === "Enter") {
-                            updateProfile("full_name", editedName);
-                            setIsEditingName(false);
-                          }
-                        }}
-                        className="w-full bg-white/5 border border-indigo-500/30 rounded-xl px-3 py-1.5 text-base text-white outline-none focus:border-indigo-500 transition-all"
+                        className="w-full bg-white/5 border border-indigo-500/30 rounded-xl px-3 py-1.5 text-white outline-none"
                       />
                     ) : (
-                      <div className="px-1">
-                        <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-1.5">
-                          {editedName || profile?.full_name || "New User"}
-                          <ShieldCheck size={16} className="text-emerald-500" />
-                        </h2>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <Circle
-                            size={7}
-                            fill={isUserOnline ? "#10b981" : "#71717a"}
-                            className={
-                              isUserOnline
-                                ? "text-emerald-500"
-                                : "text-zinc-500"
-                            }
-                          />
-                          <span
-                            className={`text-[10px] font-medium ${
-                              isUserOnline
-                                ? "text-emerald-500"
-                                : "text-zinc-500"
-                            }`}
-                          >
-                            {isUserOnline ? "Active" : "Offline"}
-                          </span>
-                        </div>
-                      </div>
+                      <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-1.5">
+                        {editedName || profile?.full_name || "New User"}
+                        <ShieldCheck size={16} className="text-emerald-500" />
+                      </h2>
                     )}
                   </div>
-
-                  <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5 group">
+                  <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
                         About
                       </span>
                       <button
                         onClick={() => {
-                          if (isEditingBio) {
-                            updateProfile("bio", editedBio);
-                          }
+                          if (isEditingBio) updateProfile("bio", editedBio);
                           setIsEditingBio(!isEditingBio);
                         }}
+                        className="text-indigo-400 text-[10px] font-semibold"
                       >
-                        {isEditingBio ? (
-                          <span className="text-indigo-400 text-[10px] font-semibold hover:underline">
-                            Save
-                          </span>
-                        ) : (
-                          <Edit2
-                            size={10}
-                            className="text-zinc-600 group-hover:text-white transition-colors"
-                          />
-                        )}
+                        {isEditingBio ? "Save" : "Edit"}
                       </button>
                     </div>
                     {isEditingBio ? (
                       <textarea
                         value={editedBio}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                          setEditedBio(e.target.value)
-                        }
-                        className="w-full bg-black/20 rounded-lg p-2.5 text-xs text-zinc-300 outline-none border border-indigo-500/30 resize-none h-16"
+                        onChange={(e) => setEditedBio(e.target.value)}
+                        className="w-full bg-black/20 rounded-lg p-2.5 text-xs text-zinc-300 outline-none resize-none h-16"
                       />
                     ) : (
-                      <p className="text-[12px] text-zinc-400 leading-snug px-1">
+                      <p className="text-[12px] text-zinc-400 italic">
                         {editedBio || profile?.bio || "No bio set yet."}
                       </p>
                     )}
                   </div>
-
                   <div className="flex items-center gap-2.5 px-3 py-2.5 bg-white/[0.02] rounded-xl border border-white/5">
-                    <Mail size={12} className="text-zinc-500 flex-shrink-0" />
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">
+                    <Mail size={12} className="text-zinc-500" />
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-bold text-zinc-600 uppercase">
                         Email
                       </span>
-                      <span className="text-[11px] text-zinc-300 truncate">
+                      <span className="text-[11px] text-zinc-300">
                         {profile?.email}
                       </span>
                     </div>
                   </div>
-
-                  <div className="pt-1">
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full py-2.5 bg-zinc-800/40 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest border border-white/5"
-                    >
-                      <LogOut size={12} />
-                      Sign Out
-                    </button>
-                  </div>
+                  <button
+                    onClick={() =>
+                      supabase.auth
+                        .signOut()
+                        .then(() => (window.location.href = "/auth"))
+                    }
+                    className="w-full py-2.5 bg-zinc-800/40 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest border border-white/5"
+                  >
+                    <LogOut size={12} /> Sign Out
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -869,7 +726,7 @@ export function ChatSidebar({
       </AnimatePresence>
 
       <AnimatePresence>
-        {showZoomedAvatar && profile?.avatar_url && (
+        {showZoomedAvatar && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
             <motion.div
               initial={{ opacity: 0 }}
@@ -887,11 +744,11 @@ export function ChatSidebar({
               <img
                 src={profile.avatar_url}
                 className="w-full h-full object-contain rounded-[32px] shadow-2xl"
-                alt="Zoomed Avatar"
+                alt=""
               />
               <button
                 onClick={() => setShowZoomedAvatar(false)}
-                className="absolute -top-10 right-0 p-2 text-white hover:text-indigo-400 transition-colors"
+                className="absolute -top-10 right-0 p-2 text-white"
               >
                 <X size={24} />
               </button>

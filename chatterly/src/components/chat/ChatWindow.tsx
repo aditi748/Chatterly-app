@@ -26,6 +26,7 @@ import {
   Mail,
   Download,
   Pencil,
+  ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,11 +49,10 @@ export function ChatWindow({
     chat?.id || null
   );
 
-  const [optimisticImage, setOptimisticImage] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showAllMedia, setShowAllMedia] = useState(false);
   const isSelectionMode = selectedIds.length > 0;
 
-  // Edit Feature States
   const [editingMessage, setEditingMessage] = useState<any | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -60,7 +60,6 @@ export function ChatWindow({
     msg: any;
   } | null>(null);
 
-  // Logic States
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [floatingDate, setFloatingDate] = useState("");
   const [showFloatingDate, setShowFloatingDate] = useState(false);
@@ -72,32 +71,9 @@ export function ChatWindow({
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<any>(null);
 
-  // Fix: Long Press Threshold Tracking
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
   const isLongPressActive = useRef(false);
-
-  // --- DOWNLOAD FUNCTION ---
-  const downloadImage = async (url: string) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      const fileName = url.split("/").pop()?.split("?")[0] || "chat-image";
-      link.download = fileName;
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      console.error("Download failed:", err);
-      window.open(url, "_blank");
-    }
-  };
 
   const getDeleteTime = useCallback(() => {
     return chat.user1_id === currentUser?.id
@@ -118,7 +94,6 @@ export function ChatWindow({
     if (!messageContainerRef.current) return;
     const container = messageContainerRef.current;
     const scrollTop = container.scrollTop;
-
     const elements = container.querySelectorAll("[data-date-marker]");
     let currentVisibleDate = "";
     let isAnyInlineDateVisible = false;
@@ -127,22 +102,16 @@ export function ChatWindow({
       const htmlEl = el as HTMLElement;
       const rect = htmlEl.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
-
       const isVisible =
         rect.top >= containerRect.top && rect.bottom <= containerRect.bottom;
-      if (isVisible) {
-        isAnyInlineDateVisible = true;
-      }
-
+      if (isVisible) isAnyInlineDateVisible = true;
       if (htmlEl.offsetTop <= scrollTop + container.offsetTop + 50) {
         currentVisibleDate = htmlEl.getAttribute("data-date-marker") || "";
       }
     });
 
-    if (currentVisibleDate && currentVisibleDate !== "Today") {
+    if (currentVisibleDate && currentVisibleDate !== "Today")
       setFloatingDate(currentVisibleDate);
-    }
-
     if (
       isAnyInlineDateVisible ||
       scrollTop < 50 ||
@@ -153,9 +122,10 @@ export function ChatWindow({
     } else {
       setShowFloatingDate(true);
       if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
-      scrollTimerRef.current = setTimeout(() => {
-        setShowFloatingDate(false);
-      }, 2000);
+      scrollTimerRef.current = setTimeout(
+        () => setShowFloatingDate(false),
+        2000
+      );
     }
   };
 
@@ -188,9 +158,10 @@ export function ChatWindow({
       typing_chat_id: currentChatId,
     });
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(() => {
-      presenceChannelRef.current.untrack();
-    }, 2500);
+    typingTimeoutRef.current = setTimeout(
+      () => presenceChannelRef.current.untrack(),
+      2500
+    );
   };
 
   const formatJoinedDate = (dateString: string) => {
@@ -226,7 +197,6 @@ export function ChatWindow({
     () => presence && !!presence[chat.otherId],
     [presence, chat.otherId]
   );
-
   const sharedMedia = useMemo(
     () => messages.filter((m) => m.type === "image").map((m) => m.text),
     [messages]
@@ -276,10 +246,6 @@ export function ChatWindow({
   };
 
   useEffect(() => {
-    if (currentChatId) markAsRead();
-  }, [currentChatId, markAsRead]);
-
-  useEffect(() => {
     const activeId = currentChatId;
     if (!activeId) {
       setMessages([]);
@@ -318,10 +284,8 @@ export function ChatWindow({
             prev.some((m) => m.id === p.new.id) ? prev : [...prev, p.new]
           );
           if (p.new.user_id !== currentUser?.id) markAsRead();
-          if (p.new.type === "image" && p.new.user_id === currentUser?.id) {
-            setOptimisticImage(null);
+          if (p.new.type === "image" && p.new.user_id === currentUser?.id)
             setIsUploading(false);
-          }
         }
       )
       .on(
@@ -341,7 +305,9 @@ export function ChatWindow({
       .on(
         "postgres_changes",
         { event: "DELETE", schema: "public", table: "messages" },
-        (p) => setMessages((prev) => prev.filter((m) => m.id !== p.old.id))
+        (p) => {
+          setMessages((prev) => prev.filter((m) => m.id !== p.old.id));
+        }
       )
       .subscribe();
     return () => {
@@ -352,7 +318,7 @@ export function ChatWindow({
   useEffect(() => {
     if (!isSelectionMode)
       scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length, optimisticImage, isSelectionMode]);
+  }, [messages.length, isSelectionMode]);
 
   const ensureConversation = async () => {
     if (currentChatId) return currentChatId;
@@ -369,7 +335,6 @@ export function ChatWindow({
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!newMessage.trim() || !currentUser?.id) return;
-
     if (editingMessage) {
       const updatedText = newMessage.trim();
       if (updatedText === editingMessage.text) {
@@ -377,7 +342,6 @@ export function ChatWindow({
         setNewMessage("");
         return;
       }
-
       const msgId = editingMessage.id;
       setNewMessage("");
       setEditingMessage(null);
@@ -391,7 +355,6 @@ export function ChatWindow({
       }
       return;
     }
-
     const txt = newMessage;
     setNewMessage("");
     try {
@@ -450,7 +413,6 @@ export function ChatWindow({
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
     isLongPressActive.current = false;
-
     longPressTimer.current = setTimeout(() => {
       isLongPressActive.current = true;
       setContextMenu({
@@ -478,9 +440,7 @@ export function ChatWindow({
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-    if (isLongPressActive.current) {
-      e.preventDefault();
-    }
+    if (isLongPressActive.current) e.preventDefault();
   };
 
   const startEditing = (msg: any) => {
@@ -493,8 +453,6 @@ export function ChatWindow({
     const file = e.target.files?.[0];
     if (!file || !currentUser?.id) return;
     setIsUploading(true);
-    const previewUrl = URL.createObjectURL(file);
-    setOptimisticImage(previewUrl);
     try {
       const activeChatId = await ensureConversation();
       if (!activeChatId) throw new Error("Could not initialize conversation");
@@ -528,7 +486,6 @@ export function ChatWindow({
       if (onRefresh) onRefresh();
     } catch (err) {
       setIsUploading(false);
-      setOptimisticImage(null);
     }
   };
 
@@ -554,6 +511,24 @@ export function ChatWindow({
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  // Improved actual download function
+  const handleDownload = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `IMG_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
   };
 
   return (
@@ -677,13 +652,12 @@ export function ChatWindow({
               {floatingDate}
             </span>
           </div>
-
           <div
             ref={messageContainerRef}
             onScroll={handleScroll}
             className="h-full overflow-y-auto px-4 py-4 md:px-10 md:py-6 flex flex-col bg-transparent custom-scrollbar scroll-smooth"
           >
-            {messages.length > 0 || optimisticImage ? (
+            {messages.length > 0 ? (
               <div className="flex flex-col w-full relative z-10">
                 {messages.map((msg, index) => {
                   const isMe = msg.user_id === currentUser?.id;
@@ -696,15 +670,12 @@ export function ChatWindow({
                     : null;
                   const isSameNextUser =
                     nextMsg && nextMsg.user_id === msg.user_id;
-                  const isSameNextMinute =
-                    nextMsgDate &&
-                    msgDate.getMinutes() === nextMsgDate.getMinutes() &&
-                    msgDate.getHours() === nextMsgDate.getHours() &&
-                    msgDate.getDate() === nextMsgDate.getDate();
                   const isFirstInGroup =
                     !prevMsg || prevMsg.user_id !== msg.user_id;
                   const shouldShowTimestamp =
-                    !isSameNextUser || !isSameNextMinute;
+                    !isSameNextUser ||
+                    (nextMsgDate &&
+                      msgDate.getMinutes() !== nextMsgDate.getMinutes());
                   const isLastInVisualGroup =
                     !nextMsg || nextMsg.user_id !== msg.user_id;
                   const label = getDateLabel(msgDate);
@@ -733,33 +704,6 @@ export function ChatWindow({
                           isMe ? "flex-row-reverse" : "flex-row"
                         } ${shouldShowTimestamp ? "mb-3" : "mb-[2px]"}`}
                       >
-                        <AnimatePresence>
-                          {isSelectionMode && isMe && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.5, width: 0 }}
-                              animate={{ opacity: 1, scale: 1, width: "auto" }}
-                              exit={{ opacity: 0, scale: 0.5, width: 0 }}
-                              className="flex items-center ml-3"
-                            >
-                              <button
-                                onClick={() => toggleSelect(msg.id)}
-                                className={`w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center ${
-                                  isSelected
-                                    ? "bg-indigo-500 border-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.4)]"
-                                    : "border-white/20 bg-white/5 hover:border-indigo-400"
-                                }`}
-                              >
-                                <Check
-                                  size={10}
-                                  className={`text-white transition-opacity ${
-                                    isSelected ? "opacity-100" : "opacity-0"
-                                  }`}
-                                  strokeWidth={4}
-                                />
-                              </button>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
                         <div
                           className={`flex flex-col flex-1 ${
                             isMe ? "items-end" : "items-start"
@@ -808,31 +752,24 @@ export function ChatWindow({
                             }`}
                           >
                             {msg.type === "image" ? (
-                              <div className="relative group/img cursor-zoom-in">
+                              <div
+                                className="relative group/img cursor-zoom-in"
+                                onClick={() => setSelectedImage(msg.text)}
+                              >
                                 <img
                                   src={msg.text}
-                                  onClick={() => setSelectedImage(msg.text)}
                                   className={`rounded-xl max-h-48 md:max-h-64 w-auto object-cover transition-all duration-300 group-hover/img:brightness-90 ${
                                     isSelected ? "brightness-50" : ""
                                   }`}
                                   alt="Shared"
                                 />
-                                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      downloadImage(msg.text);
-                                    }}
-                                    className="p-2 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
-                                  >
-                                    <Download size={16} />
-                                  </button>
-                                  <button
-                                    onClick={() => setSelectedImage(msg.text)}
-                                    className="p-2 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
-                                  >
-                                    <Maximize2 size={16} />
-                                  </button>
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                  <div className="p-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+                                    <Maximize2
+                                      size={18}
+                                      className="text-white"
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             ) : (
@@ -878,30 +815,6 @@ export function ChatWindow({
                     </React.Fragment>
                   );
                 })}
-                {optimisticImage && (
-                  <div className="w-full flex flex-row-reverse mb-3">
-                    <div className="flex flex-col items-end flex-1">
-                      <div className="relative w-fit max-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#2d3442]/50">
-                        <img
-                          src={optimisticImage}
-                          className="max-h-40 object-cover opacity-40 grayscale-[0.5]"
-                          alt="Uploading..."
-                        />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-indigo-600/80 flex items-center justify-center shadow-xl">
-                            <Loader2
-                              className="animate-spin text-white"
-                              size={16}
-                            />
-                          </div>
-                          <span className="text-[8px] font-bold text-white uppercase tracking-widest bg-black/40 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
-                            Sending...
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 <div ref={scrollRef} className="h-4" />
               </div>
             ) : (
@@ -956,11 +869,15 @@ export function ChatWindow({
               onClick={() => fileInputRef.current?.click()}
               className="p-2.5 text-zinc-300 hover:text-white bg-white/5 rounded-lg transition-all border border-white/5 disabled:opacity-50"
             >
-              <Paperclip size={16} />
+              {isUploading ? (
+                <Loader2 className="animate-spin" size={16} />
+              ) : (
+                <Paperclip size={16} />
+              )}
             </button>
             <input
               value={newMessage}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={(e) => {
                 setNewMessage(e.target.value);
                 handleTyping();
               }}
@@ -1041,85 +958,80 @@ export function ChatWindow({
                   <div className="w-full grid grid-cols-2 gap-2 mt-2">
                     <div className="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col items-center justify-center text-center">
                       <Calendar size={14} className="text-indigo-400 mb-1.5" />
-                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">
-                        Joined
+                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">
+                        Member Since
                       </span>
-                      <span className="text-[11px] font-bold text-slate-200">
+                      <span className="text-[11px] font-bold text-white">
                         {formatJoinedDate(chat.created_at)}
                       </span>
                     </div>
                     <div className="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col items-center justify-center text-center">
                       <Shield size={14} className="text-emerald-400 mb-1.5" />
-                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">
-                        Privacy
+                      <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">
+                        Status
                       </span>
-                      <span className="text-[11px] font-bold text-slate-200">
+                      <span className="text-[11px] font-bold text-white">
                         Verified
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="p-6 border-b border-white/5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Mail size={12} className="text-indigo-400" />
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                      Email Address
-                    </h4>
-                  </div>
-                  <p className="text-[13px] text-slate-300 font-medium truncate">
-                    {chat.email || "No email provided"}
-                  </p>
-                </div>
-                <div className="p-6 border-b border-white/5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <User size={12} className="text-indigo-400" />
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                      Bio
-                    </h4>
-                  </div>
-                  <p className="text-[13px] text-slate-300 leading-relaxed italic">
-                    {chat.bio || "No information shared."}
-                  </p>
-                </div>
-                {/* Shared Media Section */}
-                {sharedMedia.length > 0 && (
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
+                <div className="p-5 border-b border-white/5">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 mb-4 px-1">
+                    Contact Information
+                  </h4>
+                  <div className="space-y-1">
+                    <div className="flex flex-col gap-1 p-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer">
                       <div className="flex items-center gap-2">
-                        <ImageIcon size={12} className="text-indigo-400" />
-                        <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                          Shared Media
-                        </h4>
+                        <User size={12} className="text-indigo-400" />
+                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">
+                          Username
+                        </span>
                       </div>
-                      <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
-                        {sharedMedia.length}
+                      <span className="text-[12px] font-medium text-white truncate pl-5">
+                        @{chat.name?.toLowerCase().replace(/\s+/g, "_")}
                       </span>
+                    </div>
+                    <div className="flex flex-col gap-1 p-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        <Mail size={12} className="text-indigo-400" />
+                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">
+                          Email Address
+                        </span>
+                      </div>
+                      <span className="text-[12px] font-medium text-white truncate pl-5 group-hover:text-indigo-400 group-hover:underline transition-all underline-offset-4">
+                        {chat.email || "No email shared"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {sharedMedia.length > 0 && (
+                  <div className="p-5">
+                    <div className="flex items-center justify-between mb-4 px-1">
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500">
+                        Shared Media
+                      </h4>
+                      <button
+                        onClick={() => setShowAllMedia(true)}
+                        className="p-1 hover:bg-white/10 rounded-full transition-all text-indigo-400 hover:translate-x-1"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {sharedMedia.slice(0, 6).map((url, i) => (
                         <div
                           key={i}
-                          className="aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/5 cursor-pointer hover:border-indigo-500/50 transition-all relative group/media"
+                          onClick={() => setSelectedImage(url)}
+                          className="aspect-square rounded-lg bg-white/5 overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-500/50 transition-all relative group/m"
                         >
                           <img
                             src={url}
-                            onClick={() => {
-                              setSelectedImage(url);
-                              setIsZoomed(true);
-                            }}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover/media:scale-110"
+                            className="w-full h-full object-cover"
                             alt=""
                           />
-                          <div className="absolute inset-0 bg-indigo-600/20 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                downloadImage(url);
-                              }}
-                              className="p-1.5 rounded-md bg-black/40 backdrop-blur-sm text-white hover:bg-black/60"
-                            >
-                              <Download size={14} />
-                            </button>
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/m:opacity-100 transition-opacity flex items-center justify-center">
+                            <Maximize2 size={14} className="text-white" />
                           </div>
                         </div>
                       ))}
@@ -1127,53 +1039,146 @@ export function ChatWindow({
                   </div>
                 )}
               </div>
+              <div className="p-4 bg-black/10 border-t border-white/5">
+                <p className="text-[8px] text-zinc-600 font-bold uppercase tracking-[0.2em] text-center">
+                  Secure End-to-End Encryption
+                </p>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {(isZoomed || selectedImage) && (
+        {showAllMedia && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-8"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed inset-0 z-[250] bg-[#1e2229] flex flex-col"
           >
+            <div className="h-16 md:h-20 flex items-center justify-between px-6 border-b border-white/5 bg-[#252a33]/80 backdrop-blur-xl">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setShowAllMedia(false)}
+                  className="p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <h3 className="text-sm font-bold tracking-widest uppercase text-zinc-300">
+                  Shared Media
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full uppercase">
+                {sharedMedia.length} Files
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar py-8 px-4 md:px-16 lg:px-32">
+              <div className="max-w-7xl mx-auto grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+                {sharedMedia.map((url, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.02 }}
+                    onClick={() => setSelectedImage(url)}
+                    className="aspect-square rounded-2xl bg-white/5 overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-500/50 transition-all group relative"
+                  >
+                    <img
+                      src={url}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      alt=""
+                    />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isZoomed && chat.avatar_url && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsZoomed(false)}
+              className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+            />
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-full max-h-full flex flex-col items-center gap-4"
+              exit={{ scale: 0.5, opacity: 0 }}
+              className="relative max-w-lg w-full aspect-square"
             >
               <img
-                src={selectedImage || chat.avatar_url}
-                className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/5"
-                alt="Zoomed View"
+                src={chat.avatar_url}
+                className="w-full h-full object-contain rounded-[32px] shadow-2xl"
+                alt="Zoomed Avatar"
               />
-              <div className="flex gap-4">
-                <button
-                  onClick={() =>
-                    downloadImage(selectedImage || chat.avatar_url)
-                  }
-                  className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
-                >
-                  <Download size={18} />
-                  Download
-                </button>
-                <button
-                  onClick={() => {
-                    setIsZoomed(false);
-                    setSelectedImage(null);
-                  }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-white/5 text-white rounded-xl font-bold hover:bg-white/10 border border-white/5 transition-all"
-                >
-                  <X size={18} />
-                  Close
-                </button>
+              <button
+                onClick={() => setIsZoomed(false)}
+                className="absolute -top-10 right-0 p-2 text-white hover:text-indigo-400 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedImage && (
+          <div className="fixed inset-0 z-[400] flex flex-col items-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedImage(null)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-3xl"
+            />
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="relative w-full h-full flex flex-col"
+            >
+              {/* FIXED ACTION BAR - No Overlap */}
+              <div className="h-20 md:h-28 flex items-center justify-center px-6 shrink-0 z-10">
+                <div className="flex items-center gap-4 bg-white/5 backdrop-blur-2xl border border-white/10 p-2.5 rounded-[24px] shadow-2xl">
+                  <button
+                    onClick={() => handleDownload(selectedImage)}
+                    className="p-3 hover:bg-white/10 rounded-2xl text-zinc-400 hover:text-white transition-all hover:scale-105 active:scale-95"
+                  >
+                    <Download size={20} />
+                  </button>
+                  <div className="w-[1px] h-6 bg-white/10" />
+                  <button
+                    onClick={() => setSelectedImage(null)}
+                    className="p-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-white transition-all shadow-xl shadow-indigo-600/20 hover:scale-105 active:scale-95"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* IMAGE AREA - Contained below action bar */}
+              <div className="flex-1 flex items-center justify-center p-4 md:p-12 mb-8 overflow-hidden">
+                <motion.img
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  src={selectedImage}
+                  className="max-w-[90%] max-h-[60vh] md:max-h-[70vh] object-contain rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/5 bg-black/20"
+                  alt="Zoomed View"
+                />
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -1185,7 +1190,7 @@ export function ChatWindow({
             exit={{ opacity: 0, scale: 0.95 }}
             style={{ left: contextMenu.x, top: contextMenu.y }}
             className="fixed z-[500] min-w-[120px] bg-[#2d3442]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1.5"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => startEditing(contextMenu.msg)}
@@ -1201,20 +1206,8 @@ export function ChatWindow({
               }}
               className="w-full px-4 py-2 flex items-center gap-2.5 text-slate-200 hover:bg-white/10 transition-colors text-[11px] font-bold uppercase tracking-widest"
             >
-              <Check size={14} className="text-emerald-400" />
+              <Trash2 size={14} className="text-red-400" />
               Select
-            </button>
-            <div className="h-px bg-white/5 my-1" />
-            <button
-              onClick={() => {
-                setSelectedIds([contextMenu.msg.id]);
-                handleDeleteMessages();
-                setContextMenu(null);
-              }}
-              className="w-full px-4 py-2 flex items-center gap-2.5 text-red-400 hover:bg-red-500/10 transition-colors text-[11px] font-bold uppercase tracking-widest"
-            >
-              <Trash2 size={14} />
-              Delete
             </button>
           </motion.div>
         )}

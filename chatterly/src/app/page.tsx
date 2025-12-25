@@ -200,105 +200,128 @@ export default function RootChatPage() {
     );
 
   return (
-    <main className="flex h-dvh w-full bg-black text-white overflow-hidden fixed inset-0">
-      <div
-        className={`${
-          selectedChatId || tempChat ? "hidden md:flex" : "flex"
-        } w-full md:w-[380px] h-full border-r border-white/5 flex-shrink-0 bg-[#111216]`}
-      >
-        <ChatSidebar
-          chats={visibleChats}
-          selectedId={selectedChatId || (tempChat ? "temp" : null)}
-          onSelectChat={(id: string) => {
-            setSelectedChatId(id);
-            setTempChat(null);
-          }}
-          profile={profile}
-          onNewChat={() => setIsNewChatOpen(true)}
-          presence={presence}
-          currentUserId={currentUser.id}
-          onRefresh={() => fetchChats(currentUser.id)}
-        />
-      </div>
+    <>
+      {/* CRITICAL FIX FOR MOBILE LONG-PRESS:
+        Disables system context menus and text selection globally for the chat app.
+        This prevents the "flicker" where the browser tries to open its own menu 
+        instead of triggering your custom long-press selection.
+      */}
+      <style jsx global>{`
+        * {
+          -webkit-touch-callout: none !important;
+          -webkit-user-select: none !important;
+          -khtml-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          user-select: none !important;
+        }
+        input,
+        textarea {
+          -webkit-user-select: text !important;
+          user-select: text !important;
+        }
+      `}</style>
 
-      <div
-        className={`${
-          !(selectedChatId || tempChat) ? "hidden md:flex" : "flex"
-        } flex-1 h-full bg-[#08080a] overflow-hidden relative`}
-      >
-        {(selectedChatId || tempChat) && currentActiveChat ? (
-          <ChatWindow
-            chat={currentActiveChat}
-            currentUser={currentUser}
-            onBack={() => {
-              setSelectedChatId(null);
+      <main className="flex h-dvh w-full bg-black text-white overflow-hidden fixed inset-0">
+        <div
+          className={`${
+            selectedChatId || tempChat ? "hidden md:flex" : "flex"
+          } w-full md:w-[380px] h-full border-r border-white/5 flex-shrink-0 bg-[#111216]`}
+        >
+          <ChatSidebar
+            chats={visibleChats}
+            selectedId={selectedChatId || (tempChat ? "temp" : null)}
+            onSelectChat={(id: string) => {
+              setSelectedChatId(id);
               setTempChat(null);
             }}
-            onRefresh={() => fetchChats(currentUser.id)}
+            profile={profile}
+            onNewChat={() => setIsNewChatOpen(true)}
             presence={presence}
+            currentUserId={currentUser.id}
+            onRefresh={() => fetchChats(currentUser.id)}
           />
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center relative">
-            <div className="absolute w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
-            <div className="flex flex-col items-center gap-5">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
-                <MessageSquare className="w-8 h-8 text-white stroke-[2.5px]" />
-              </div>
-              <div className="text-center space-y-1">
-                <h2 className="text-zinc-200 font-medium text-sm tracking-wide">
-                  Select a conversation
-                </h2>
-                <p className="text-zinc-600 text-[11px] font-medium tracking-widest uppercase">
-                  To start chatting
-                </p>
+        </div>
+
+        <div
+          className={`${
+            !(selectedChatId || tempChat) ? "hidden md:flex" : "flex"
+          } flex-1 h-full bg-[#08080a] overflow-hidden relative`}
+        >
+          {(selectedChatId || tempChat) && currentActiveChat ? (
+            <ChatWindow
+              chat={currentActiveChat}
+              currentUser={currentUser}
+              onBack={() => {
+                setSelectedChatId(null);
+                setTempChat(null);
+              }}
+              onRefresh={() => fetchChats(currentUser.id)}
+              presence={presence}
+            />
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center relative">
+              <div className="absolute w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+              <div className="flex flex-col items-center gap-5">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
+                  <MessageSquare className="w-8 h-8 text-white stroke-[2.5px]" />
+                </div>
+                <div className="text-center space-y-1">
+                  <h2 className="text-zinc-200 font-medium text-sm tracking-wide">
+                    Select a conversation
+                  </h2>
+                  <p className="text-zinc-600 text-[11px] font-medium tracking-widest uppercase">
+                    To start chatting
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      <AnimatePresence mode="wait">
-        {isProfileModalOpen && (
-          <ProfileModal
-            profile={profile}
-            isOpen={isProfileModalOpen}
-            onClose={() => setIsProfileModalOpen(false)}
-            onUpdate={() => {
-              fetchChats(currentUser.id);
-              supabase
-                .from("profiles")
-                .select("*")
-                .eq("id", currentUser.id)
-                .single()
-                .then(({ data }) => setProfile(data));
-            }}
-          />
-        )}
-        {isNewChatOpen && (
-          <NewChatModal
-            isOpen={isNewChatOpen}
-            currentUserId={currentUser?.id}
-            onClose={() => setIsNewChatOpen(false)}
-            onChatCreated={(id: string | null, newUser?: any) => {
-              if (id) {
-                setSelectedChatId(id);
-                setTempChat(null);
-              } else if (newUser) {
-                setSelectedChatId(null);
-                setTempChat({
-                  id: null,
-                  otherId: newUser.id,
-                  name: newUser.full_name,
-                  avatar_url: newUser.avatar_url,
-                  email: newUser.email,
-                  is_temp: true,
-                });
-              }
-              fetchChats(currentUser.id);
-            }}
-          />
-        )}
-      </AnimatePresence>
-    </main>
+        <AnimatePresence mode="wait">
+          {isProfileModalOpen && (
+            <ProfileModal
+              profile={profile}
+              isOpen={isProfileModalOpen}
+              onClose={() => setIsProfileModalOpen(false)}
+              onUpdate={() => {
+                fetchChats(currentUser.id);
+                supabase
+                  .from("profiles")
+                  .select("*")
+                  .eq("id", currentUser.id)
+                  .single()
+                  .then(({ data }) => setProfile(data));
+              }}
+            />
+          )}
+          {isNewChatOpen && (
+            <NewChatModal
+              isOpen={isNewChatOpen}
+              currentUserId={currentUser?.id}
+              onClose={() => setIsNewChatOpen(false)}
+              onChatCreated={(id: string | null, newUser?: any) => {
+                if (id) {
+                  setSelectedChatId(id);
+                  setTempChat(null);
+                } else if (newUser) {
+                  setSelectedChatId(null);
+                  setTempChat({
+                    id: null,
+                    otherId: newUser.id,
+                    name: newUser.full_name,
+                    avatar_url: newUser.avatar_url,
+                    email: newUser.email,
+                    is_temp: true,
+                  });
+                }
+                fetchChats(currentUser.id);
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </main>
+    </>
   );
 }
