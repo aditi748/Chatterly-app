@@ -168,6 +168,7 @@ export function ChatSidebar({
     const touch = e.touches[0];
     const moveX = Math.abs(touch.clientX - touchStartPos.current.x);
     const moveY = Math.abs(touch.clientY - touchStartPos.current.y);
+
     if (moveX > 10 || moveY > 10) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current);
@@ -215,6 +216,7 @@ export function ChatSidebar({
           .update({ [column]: shouldArchive })
           .eq("id", chatId);
       });
+
       await Promise.all(updates);
       setSelectedChatIds([]);
       if (onRefresh) onRefresh();
@@ -227,6 +229,7 @@ export function ChatSidebar({
     if (selectedChatIds.length === 0) return;
     if (!confirm("Delete selected chats? This will clear history for you."))
       return;
+
     try {
       if (selectedId && selectedChatIds.includes(selectedId)) {
         onSelectChat(null);
@@ -249,6 +252,7 @@ export function ChatSidebar({
           })
           .eq("id", chatId);
       });
+
       await Promise.all(updates);
       setSelectedChatIds([]);
       if (onRefresh) onRefresh();
@@ -322,7 +326,6 @@ export function ChatSidebar({
       </div>
 
       <div className="relative z-10 flex flex-col h-full">
-        {/* Header Section */}
         <div className="px-5 pt-8 md:pt-10 pb-4 h-[90px] md:h-[100px] flex items-center justify-between overflow-hidden">
           <AnimatePresence mode="popLayout">
             {selectedChatIds.length === 0 ? (
@@ -335,8 +338,48 @@ export function ChatSidebar({
                 className="flex items-center justify-between w-full"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <span className="text-white font-black text-base">C</span>
+                  <div className="w-8 h-8 rounded-lg overflow-hidden shadow-lg shadow-indigo-500/20 relative group">
+                    <svg
+                      viewBox="0 0 100 100"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-full h-full"
+                    >
+                      <rect
+                        width="100"
+                        height="100"
+                        rx="22"
+                        fill="url(#sidebar-logo-grad)"
+                      />
+                      <text
+                        x="50%"
+                        y="53%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="white"
+                        fontSize="55"
+                        fontWeight="bold"
+                        fontFamily="Inter, system-ui, sans-serif"
+                        style={{
+                          filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.2))",
+                        }}
+                      >
+                        C
+                      </text>
+                      <defs>
+                        <linearGradient
+                          id="sidebar-logo-grad"
+                          x1="0"
+                          y1="0"
+                          x2="100"
+                          y2="100"
+                          gradientUnits="userSpaceOnUse"
+                        >
+                          <stop stopColor="#6366f1" />
+                          <stop offset="1" stopColor="#4338ca" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
                   </div>
                   <h1 className="text-lg font-black tracking-tight text-white">
                     Chatterly
@@ -413,7 +456,6 @@ export function ChatSidebar({
           </AnimatePresence>
         </div>
 
-        {/* Search Section */}
         <div className="px-4 mt-2 mb-4">
           <div className="relative group">
             <Search
@@ -422,14 +464,15 @@ export function ChatSidebar({
             />
             <input
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
               placeholder="Search conversations..."
               className="w-full bg-[#252a33]/60 border border-white/5 rounded-2xl py-2.5 pl-10 pr-4 text-[12px] outline-none text-white focus:border-indigo-500/40 transition-all"
             />
           </div>
         </div>
 
-        {/* View Toggles */}
         <div className="px-4 mb-4 flex gap-2">
           <button
             onClick={() => {
@@ -462,7 +505,6 @@ export function ChatSidebar({
           </button>
         </div>
 
-        {/* Chats List */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-10 space-y-1.5 custom-scrollbar relative z-10">
           <AnimatePresence initial={false}>
             {filteredChats.length > 0 ? (
@@ -480,8 +522,12 @@ export function ChatSidebar({
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
-                    onContextMenu={(e) => handleRightClick(e, chat.id)}
-                    onTouchStart={(e) => handleTouchStart(e, chat.id)}
+                    onContextMenu={(e: React.MouseEvent) =>
+                      handleRightClick(e, chat.id)
+                    }
+                    onTouchStart={(e: React.TouchEvent) =>
+                      handleTouchStart(e, chat.id)
+                    }
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     onClick={() =>
@@ -599,7 +645,6 @@ export function ChatSidebar({
           </AnimatePresence>
         </div>
 
-        {/* Floating Action Button */}
         <div className="absolute bottom-6 right-6 z-[100]">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -618,7 +663,6 @@ export function ChatSidebar({
         </div>
       </div>
 
-      {/* Profile Modal */}
       <AnimatePresence>
         {showProfileModal && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -673,7 +717,7 @@ export function ChatSidebar({
                     )}
                   </div>
                   <button
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
                     }}
@@ -712,9 +756,13 @@ export function ChatSidebar({
                     {isEditingName ? (
                       <input
                         value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setEditedName(e.target.value)
+                        }
                         autoFocus
-                        onKeyDown={(e) => {
+                        onKeyDown={(
+                          e: React.KeyboardEvent<HTMLInputElement>
+                        ) => {
                           if (e.key === "Enter") {
                             updateProfile("full_name", editedName);
                             setIsEditingName(false);
@@ -780,7 +828,9 @@ export function ChatSidebar({
                     {isEditingBio ? (
                       <textarea
                         value={editedBio}
-                        onChange={(e) => setEditedBio(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                          setEditedBio(e.target.value)
+                        }
                         className="w-full bg-black/20 rounded-lg p-2.5 text-xs text-zinc-300 outline-none border border-indigo-500/30 resize-none h-16"
                       />
                     ) : (
@@ -818,7 +868,6 @@ export function ChatSidebar({
         )}
       </AnimatePresence>
 
-      {/* Image Zoom */}
       <AnimatePresence>
         {showZoomedAvatar && profile?.avatar_url && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">

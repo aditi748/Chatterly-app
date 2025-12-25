@@ -23,12 +23,14 @@ interface Profile {
 }
 
 interface NewChatModalProps {
+  isOpen: boolean;
   currentUserId: string;
   onClose: () => void;
   onChatCreated: (chatId: string | null, newUser?: Profile) => void;
 }
 
 export function NewChatModal({
+  isOpen,
   currentUserId,
   onClose,
   onChatCreated,
@@ -148,6 +150,8 @@ export function NewChatModal({
       setCreating(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">

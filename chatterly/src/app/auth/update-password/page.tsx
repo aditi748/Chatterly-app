@@ -71,9 +71,20 @@ export default function UpdatePasswordPage() {
       });
 
       if (updateError) {
+        // Here we catch the error from Supabase and show your custom text
+        if (
+          updateError.message
+            .toLowerCase()
+            .includes("different from the old password")
+        ) {
+          setError("New password cannot be the same as your old password.");
+          setLoading(false);
+          return; // Stop execution here so it doesn't show success
+        }
         throw updateError;
       }
 
+      // If we reach here, it means the password was actually different and updated
       setSuccess(true);
       await supabase.auth.signOut();
 
@@ -83,13 +94,13 @@ export default function UpdatePasswordPage() {
     } catch (err: any) {
       console.error("Update error:", err);
       setError(err.message || "Failed to update password. Try again.");
-      setLoading(false); // STOPS THE INFINITE LOADING
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-[100dvh] w-full bg-[#1a1b1e] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
-      {/* Ambient Glow Orbs - Exact UI */}
+      {/* Ambient Glow Orbs */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[60%] bg-indigo-500/10 blur-[100px] rounded-full" />
         <div className="absolute bottom-[-5%] right-[-5%] w-[60%] h-[60%] bg-purple-500/10 blur-[100px] rounded-full" />
@@ -103,8 +114,46 @@ export default function UpdatePasswordPage() {
       >
         <div className="text-center mb-8">
           <div className="inline-block relative">
-            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-indigo-500/20">
-              C
+            <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xl shadow-indigo-500/20">
+              <svg
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full"
+              >
+                <rect
+                  width="100"
+                  height="100"
+                  rx="22"
+                  fill="url(#update-logo-grad)"
+                />
+                <text
+                  x="50%"
+                  y="53%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="white"
+                  fontSize="55"
+                  fontWeight="bold"
+                  fontFamily="Inter, system-ui, sans-serif"
+                  style={{ filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.2))" }}
+                >
+                  C
+                </text>
+                <defs>
+                  <linearGradient
+                    id="update-logo-grad"
+                    x1="0"
+                    y1="0"
+                    x2="100"
+                    y2="100"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="#6366f1" />
+                    <stop offset="1" stopColor="#4338ca" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mt-4">Chatterly</h2>
@@ -114,7 +163,7 @@ export default function UpdatePasswordPage() {
         </div>
 
         <div className="bg-[#242529] border border-white/5 backdrop-blur-md rounded-[28px] p-8 shadow-2xl relative overflow-hidden">
-          {/* Progress Glow - Exact UI */}
+          {/* Progress Glow */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-white/5">
             <div
               className={`h-full transition-all duration-1000 ${
@@ -146,7 +195,6 @@ export default function UpdatePasswordPage() {
             ) : (
               <form onSubmit={handleUpdatePassword} className="space-y-5 pt-2">
                 <div className="space-y-4">
-                  {/* New Password */}
                   <div className="relative group">
                     <Lock
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"
@@ -183,7 +231,6 @@ export default function UpdatePasswordPage() {
                     ))}
                   </div>
 
-                  {/* Confirm Password */}
                   <div className="relative group">
                     <Lock
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"

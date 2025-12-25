@@ -657,8 +657,43 @@ export default function AuthPage() {
       >
         <div className="text-center mb-6 sm:mb-8">
           <motion.div layoutId="logo" className="inline-block relative group">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-xl shadow-indigo-500/20">
-              C
+            <div className="absolute inset-0 bg-indigo-500/30 blur-xl rounded-full group-hover:bg-indigo-500/50 transition-all duration-500" />
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 overflow-hidden shadow-[0_8px_30px_rgb(79,70,229,0.3)]">
+              {/* HIGH-DEFINITION VECTOR LOGO */}
+              <svg
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full"
+              >
+                <rect width="100" height="100" rx="22" fill="url(#logo-grad)" />
+                <text
+                  x="50%"
+                  y="53%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="white"
+                  fontSize="55"
+                  fontWeight="bold"
+                  fontFamily="Inter, system-ui, sans-serif"
+                  style={{ filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.2))" }}
+                >
+                  C
+                </text>
+                <defs>
+                  <linearGradient
+                    id="logo-grad"
+                    x1="0"
+                    y1="0"
+                    x2="100"
+                    y2="100"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="#6366f1" />
+                    <stop offset="1" stopColor="#4338ca" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </motion.div>
           <h2 className="text-xl sm:text-2xl font-bold text-white mt-3 sm:mt-4">
@@ -1024,9 +1059,20 @@ export default function UpdatePasswordPage() {
       });
 
       if (updateError) {
+        // Here we catch the error from Supabase and show your custom text
+        if (
+          updateError.message
+            .toLowerCase()
+            .includes("different from the old password")
+        ) {
+          setError("New password cannot be the same as your old password.");
+          setLoading(false);
+          return; // Stop execution here so it doesn't show success
+        }
         throw updateError;
       }
 
+      // If we reach here, it means the password was actually different and updated
       setSuccess(true);
       await supabase.auth.signOut();
 
@@ -1036,13 +1082,13 @@ export default function UpdatePasswordPage() {
     } catch (err: any) {
       console.error("Update error:", err);
       setError(err.message || "Failed to update password. Try again.");
-      setLoading(false); // STOPS THE INFINITE LOADING
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-[100dvh] w-full bg-[#1a1b1e] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
-      {/* Ambient Glow Orbs - Exact UI */}
+      {/* Ambient Glow Orbs */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[60%] bg-indigo-500/10 blur-[100px] rounded-full" />
         <div className="absolute bottom-[-5%] right-[-5%] w-[60%] h-[60%] bg-purple-500/10 blur-[100px] rounded-full" />
@@ -1056,8 +1102,46 @@ export default function UpdatePasswordPage() {
       >
         <div className="text-center mb-8">
           <div className="inline-block relative">
-            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-indigo-500/20">
-              C
+            <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xl shadow-indigo-500/20">
+              <svg
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full"
+              >
+                <rect
+                  width="100"
+                  height="100"
+                  rx="22"
+                  fill="url(#update-logo-grad)"
+                />
+                <text
+                  x="50%"
+                  y="53%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="white"
+                  fontSize="55"
+                  fontWeight="bold"
+                  fontFamily="Inter, system-ui, sans-serif"
+                  style={{ filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.2))" }}
+                >
+                  C
+                </text>
+                <defs>
+                  <linearGradient
+                    id="update-logo-grad"
+                    x1="0"
+                    y1="0"
+                    x2="100"
+                    y2="100"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="#6366f1" />
+                    <stop offset="1" stopColor="#4338ca" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mt-4">Chatterly</h2>
@@ -1067,7 +1151,7 @@ export default function UpdatePasswordPage() {
         </div>
 
         <div className="bg-[#242529] border border-white/5 backdrop-blur-md rounded-[28px] p-8 shadow-2xl relative overflow-hidden">
-          {/* Progress Glow - Exact UI */}
+          {/* Progress Glow */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-white/5">
             <div
               className={`h-full transition-all duration-1000 ${
@@ -1099,7 +1183,6 @@ export default function UpdatePasswordPage() {
             ) : (
               <form onSubmit={handleUpdatePassword} className="space-y-5 pt-2">
                 <div className="space-y-4">
-                  {/* New Password */}
                   <div className="relative group">
                     <Lock
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"
@@ -1136,7 +1219,6 @@ export default function UpdatePasswordPage() {
                     ))}
                   </div>
 
-                  {/* Confirm Password */}
                   <div className="relative group">
                     <Lock
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"
@@ -1616,7 +1698,7 @@ export default function RootChatPage() {
         <ChatSidebar
           chats={visibleChats}
           selectedId={selectedChatId || (tempChat ? "temp" : null)}
-          onSelectChat={(id) => {
+          onSelectChat={(id: string) => {
             setSelectedChatId(id);
             setTempChat(null);
           }}
@@ -1833,6 +1915,7 @@ import {
   Loader2,
   ShieldCheck,
   Trash2,
+  Circle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1937,6 +2020,32 @@ export function ChatSidebar({
     }
   };
 
+  const updateProfile = async (field: string, value: string) => {
+    if (profile && profile[field] === value) return;
+
+    try {
+      if (!currentUserId) return;
+
+      if (field === "full_name") setEditedName(value);
+      if (field === "bio") setEditedBio(value);
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ [field]: value })
+        .eq("id", currentUserId);
+
+      if (error) throw error;
+
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      if (profile) {
+        if (field === "full_name") setEditedName(profile.full_name);
+        if (field === "bio") setEditedBio(profile.bio);
+      }
+    }
+  };
+
   const handleRightClick = (e: React.MouseEvent, chatId: string) => {
     e.preventDefault();
     toggleSelection(chatId);
@@ -1956,6 +2065,7 @@ export function ChatSidebar({
     const touch = e.touches[0];
     const moveX = Math.abs(touch.clientX - touchStartPos.current.x);
     const moveY = Math.abs(touch.clientY - touchStartPos.current.y);
+
     if (moveX > 10 || moveY > 10) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current);
@@ -2059,19 +2169,6 @@ export function ChatSidebar({
     }
   };
 
-  const updateProfile = async (field: string, value: string) => {
-    try {
-      if (!currentUserId) return;
-      await supabase
-        .from("profiles")
-        .update({ [field]: value })
-        .eq("id", currentUserId);
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      console.error("Error updating profile:", err);
-    }
-  };
-
   const formatTime = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -2116,6 +2213,8 @@ export function ChatSidebar({
     return matchesSearch && matchesView;
   });
 
+  const isUserOnline = presence && !!presence[currentUserId];
+
   return (
     <div className="flex flex-col h-full bg-[#1e2229] border-r border-white/5 w-full select-none relative overflow-hidden">
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -2136,8 +2235,48 @@ export function ChatSidebar({
                 className="flex items-center justify-between w-full"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <span className="text-white font-black text-base">C</span>
+                  <div className="w-8 h-8 rounded-lg overflow-hidden shadow-lg shadow-indigo-500/20 relative group">
+                    <svg
+                      viewBox="0 0 100 100"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-full h-full"
+                    >
+                      <rect
+                        width="100"
+                        height="100"
+                        rx="22"
+                        fill="url(#sidebar-logo-grad)"
+                      />
+                      <text
+                        x="50%"
+                        y="53%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="white"
+                        fontSize="55"
+                        fontWeight="bold"
+                        fontFamily="Inter, system-ui, sans-serif"
+                        style={{
+                          filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.2))",
+                        }}
+                      >
+                        C
+                      </text>
+                      <defs>
+                        <linearGradient
+                          id="sidebar-logo-grad"
+                          x1="0"
+                          y1="0"
+                          x2="100"
+                          y2="100"
+                          gradientUnits="userSpaceOnUse"
+                        >
+                          <stop stopColor="#6366f1" />
+                          <stop offset="1" stopColor="#4338ca" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
                   </div>
                   <h1 className="text-lg font-black tracking-tight text-white">
                     Chatterly
@@ -2147,7 +2286,7 @@ export function ChatSidebar({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowProfileModal(true)}
-                  className="w-10 h-10 rounded-2xl border border-white/10 p-0.5 bg-white/5 overflow-hidden transition-transform shadow-xl"
+                  className="w-10 h-10 rounded-2xl border border-white/10 p-0.5 bg-white/5 overflow-hidden transition-transform shadow-xl relative"
                 >
                   {profile?.avatar_url ? (
                     <img
@@ -2167,40 +2306,46 @@ export function ChatSidebar({
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
                 transition={fastTransition}
-                className="flex items-center justify-between w-full bg-indigo-500/10 border border-indigo-500/20 rounded-2xl px-4 py-2.5 mb-2 shadow-inner"
+                className="flex items-center justify-between w-full bg-[#252a33]/80 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 mb-2 shadow-2xl"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSelectedChatIds([])}
-                    className="p-1 text-zinc-400 hover:text-white transition-colors"
+                    className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    title="Cancel selection"
                   >
                     <X size={18} />
                   </button>
-                  <span className="text-indigo-400 font-bold text-sm">
-                    {selectedChatIds.length} Selected
-                  </span>
+                  <div className="h-4 w-[1px] bg-white/10 mx-1" />
+                  <div className="flex items-center justify-center px-1">
+                    <span className="text-indigo-500 font-bold text-sm">
+                      {selectedChatIds.length}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleBulkDelete}
-                    className="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all"
-                    title="Delete for me"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={handleBulkArchive}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-500/20"
+                    className="p-2.5 bg-white/5 hover:bg-indigo-500 text-zinc-300 hover:text-white rounded-xl transition-all shadow-lg"
+                    title={
+                      view === "active"
+                        ? "Archive selected"
+                        : "Restore selected"
+                    }
                   >
                     {view === "active" ? (
-                      <>
-                        <Archive size={16} /> Archive
-                      </>
+                      <Archive size={18} />
                     ) : (
-                      <>
-                        <ArchiveRestore size={16} /> Restore
-                      </>
+                      <ArchiveRestore size={18} />
                     )}
+                  </button>
+                  <button
+                    onClick={handleBulkDelete}
+                    className="p-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all shadow-lg"
+                    title="Delete for me"
+                  >
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </motion.div>
@@ -2216,7 +2361,9 @@ export function ChatSidebar({
             />
             <input
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
               placeholder="Search conversations..."
               className="w-full bg-[#252a33]/60 border border-white/5 rounded-2xl py-2.5 pl-10 pr-4 text-[12px] outline-none text-white focus:border-indigo-500/40 transition-all"
             />
@@ -2272,8 +2419,12 @@ export function ChatSidebar({
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
-                    onContextMenu={(e) => handleRightClick(e, chat.id)}
-                    onTouchStart={(e) => handleTouchStart(e, chat.id)}
+                    onContextMenu={(e: React.MouseEvent) =>
+                      handleRightClick(e, chat.id)
+                    }
+                    onTouchStart={(e: React.TouchEvent) =>
+                      handleTouchStart(e, chat.id)
+                    }
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     onClick={() =>
@@ -2281,7 +2432,7 @@ export function ChatSidebar({
                         ? toggleSelection(chat.id)
                         : onSelectChat(chat.id)
                     }
-                    className={`w-full flex items-center gap-3 p-3 rounded-[24px] transition-all border relative ${
+                    className={`w-full flex items-center gap-3 p-3 rounded-[24px] transition-all border relative flex-shrink-0 ${
                       isMultiSelected
                         ? "bg-indigo-500/20 border-indigo-500/50"
                         : isSelected
@@ -2383,7 +2534,7 @@ export function ChatSidebar({
                 );
               })
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
+              <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 py-20">
                 <MessageSquarePlus size={40} className="mb-4" />
                 <p className="text-xs">No conversations found</p>
               </div>
@@ -2409,7 +2560,6 @@ export function ChatSidebar({
         </div>
       </div>
 
-      {/* Profile Modal */}
       <AnimatePresence>
         {showProfileModal && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -2418,40 +2568,38 @@ export function ChatSidebar({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => !isUploading && setShowProfileModal(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+              className="absolute inset-0 bg-black/70 backdrop-blur-xl"
             />
 
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 30 }}
-              className="relative w-full max-w-[360px] bg-[#1a1b1e] border border-white/10 rounded-[40px] shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden"
+              className="relative w-full max-w-[340px] bg-[#1a1b1e] border border-white/10 rounded-[28px] shadow-[0_32px_80px_rgba(0,0,0,0.7)] overflow-hidden"
             >
-              {/* Header Cover */}
-              <div className="h-32 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_20%,#ffffff,transparent)]" />
+              <div className="h-24 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative">
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                 <button
                   onClick={() => setShowProfileModal(false)}
-                  className="absolute top-5 right-5 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all backdrop-blur-md"
+                  className="absolute top-3 right-3 p-1.5 bg-black/10 hover:bg-black/30 text-white rounded-full transition-all backdrop-blur-md"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 
-              <div className="px-8 pb-10 -mt-14 relative">
-                {/* Avatar Section */}
-                <div className="relative inline-block mb-6">
+              <div className="px-6 pb-8 -mt-10 relative">
+                <div className="relative inline-block mb-3">
                   <div
                     onClick={() =>
                       profile?.avatar_url && setShowZoomedAvatar(true)
                     }
-                    className={`w-24 h-24 rounded-[32px] border-[6px] border-[#1a1b1e] bg-[#242529] overflow-hidden shadow-2xl relative ${
+                    className={`w-20 h-20 rounded-[24px] border-[4px] border-[#1a1b1e] bg-[#242529] overflow-hidden shadow-2xl relative ${
                       profile?.avatar_url ? "cursor-zoom-in" : ""
                     }`}
                   >
                     {isUploading ? (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
-                        <Loader2 className="animate-spin text-white" />
+                        <Loader2 className="animate-spin text-white size-5" />
                       </div>
                     ) : profile?.avatar_url ? (
                       <img
@@ -2460,19 +2608,19 @@ export function ChatSidebar({
                         alt=""
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-3xl font-black text-indigo-400 bg-indigo-500/10">
+                      <div className="w-full h-full flex items-center justify-center text-2xl font-black text-indigo-400 bg-indigo-500/10">
                         {profile?.full_name?.charAt(0)}
                       </div>
                     )}
                   </div>
                   <button
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
                     }}
-                    className="absolute bottom-0 -right-2 p-2.5 bg-white text-indigo-600 rounded-2xl shadow-xl hover:scale-110 transition-transform border border-white/20 active:scale-95 z-10"
+                    className="absolute bottom-0 -right-1 p-1.5 bg-indigo-500 text-white rounded-lg shadow-xl hover:bg-indigo-600 transition-all border border-white/10 active:scale-95 z-10"
                   >
-                    <Camera size={16} strokeWidth={2.5} />
+                    <Camera size={12} />
                   </button>
                   <input
                     type="file"
@@ -2483,93 +2631,131 @@ export function ChatSidebar({
                   />
                 </div>
 
-                <div className="space-y-6">
-                  {/* Name Section */}
+                <div className="space-y-4">
                   <div>
-                    <div className="flex items-center justify-between mb-1.5 px-1">
-                      <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[2.5px]">
-                        Identity
+                    <div className="flex items-center justify-between mb-1 px-1">
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                        Profile
                       </span>
                       <button
                         onClick={() => {
-                          if (isEditingName)
+                          if (isEditingName) {
                             updateProfile("full_name", editedName);
+                          }
                           setIsEditingName(!isEditingName);
                         }}
-                        className="text-indigo-400 text-[11px] font-bold hover:text-indigo-300 transition-colors"
+                        className="text-indigo-400 text-[10px] font-semibold hover:underline"
                       >
-                        {isEditingName ? "Save Changes" : "Edit"}
+                        {isEditingName ? "Save" : "Edit"}
                       </button>
                     </div>
+
                     {isEditingName ? (
                       <input
                         value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setEditedName(e.target.value)
+                        }
                         autoFocus
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white outline-none focus:border-indigo-500/50 transition-all"
+                        onKeyDown={(
+                          e: React.KeyboardEvent<HTMLInputElement>
+                        ) => {
+                          if (e.key === "Enter") {
+                            updateProfile("full_name", editedName);
+                            setIsEditingName(false);
+                          }
+                        }}
+                        className="w-full bg-white/5 border border-indigo-500/30 rounded-xl px-3 py-1.5 text-base text-white outline-none focus:border-indigo-500 transition-all"
                       />
                     ) : (
-                      <h2 className="text-2xl font-black text-white px-1 tracking-tight flex items-center gap-2">
-                        {profile?.full_name || "New User"}
-                        <ShieldCheck size={18} className="text-emerald-500" />
-                      </h2>
+                      <div className="px-1">
+                        <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-1.5">
+                          {editedName || profile?.full_name || "New User"}
+                          <ShieldCheck size={16} className="text-emerald-500" />
+                        </h2>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <Circle
+                            size={7}
+                            fill={isUserOnline ? "#10b981" : "#71717a"}
+                            className={
+                              isUserOnline
+                                ? "text-emerald-500"
+                                : "text-zinc-500"
+                            }
+                          />
+                          <span
+                            className={`text-[10px] font-medium ${
+                              isUserOnline
+                                ? "text-emerald-500"
+                                : "text-zinc-500"
+                            }`}
+                          >
+                            {isUserOnline ? "Active" : "Offline"}
+                          </span>
+                        </div>
+                      </div>
                     )}
                   </div>
 
-                  {/* Bio Section */}
-                  <div className="bg-white/[0.03] rounded-[28px] p-5 border border-white/5 relative group">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] font-black text-indigo-400/80 uppercase tracking-widest">
-                        Bio / Status
+                  <div className="bg-white/[0.02] rounded-xl p-3 border border-white/5 group">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                        About
                       </span>
                       <button
                         onClick={() => {
-                          if (isEditingBio) updateProfile("bio", editedBio);
+                          if (isEditingBio) {
+                            updateProfile("bio", editedBio);
+                          }
                           setIsEditingBio(!isEditingBio);
                         }}
                       >
-                        <Edit2
-                          size={12}
-                          className="text-zinc-600 group-hover:text-white transition-colors"
-                        />
+                        {isEditingBio ? (
+                          <span className="text-indigo-400 text-[10px] font-semibold hover:underline">
+                            Save
+                          </span>
+                        ) : (
+                          <Edit2
+                            size={10}
+                            className="text-zinc-600 group-hover:text-white transition-colors"
+                          />
+                        )}
                       </button>
                     </div>
                     {isEditingBio ? (
                       <textarea
                         value={editedBio}
-                        onChange={(e) => setEditedBio(e.target.value)}
-                        className="w-full bg-black/30 rounded-2xl p-4 text-xs text-zinc-300 outline-none border border-indigo-500/30 resize-none h-24 scrollbar-hide"
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                          setEditedBio(e.target.value)
+                        }
+                        className="w-full bg-black/20 rounded-lg p-2.5 text-xs text-zinc-300 outline-none border border-indigo-500/30 resize-none h-16"
                       />
                     ) : (
-                      <p className="text-[13px] text-zinc-400 leading-relaxed italic px-1">
-                        {profile?.bio || "Tell the world about yourself..."}
+                      <p className="text-[12px] text-zinc-400 leading-snug px-1">
+                        {editedBio || profile?.bio || "No bio set yet."}
                       </p>
                     )}
                   </div>
 
-                  {/* Contact / System Info */}
-                  <div className="grid grid-cols-1 gap-2.5">
-                    <div className="flex items-center gap-4 px-5 py-4 bg-white/[0.02] rounded-2xl border border-white/5">
-                      <Mail size={16} className="text-zinc-500" />
-                      <div className="flex flex-col">
-                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-tight">
-                          Email Address
-                        </span>
-                        <span className="text-[12px] text-zinc-300 font-medium truncate max-w-[200px]">
-                          {profile?.email}
-                        </span>
-                      </div>
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 bg-white/[0.02] rounded-xl border border-white/5">
+                    <Mail size={12} className="text-zinc-500 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-tighter">
+                        Email
+                      </span>
+                      <span className="text-[11px] text-zinc-300 truncate">
+                        {profile?.email}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="pt-2 flex flex-col gap-3">
+                  <div className="pt-1">
                     <button
                       onClick={handleSignOut}
-                      className="w-full py-4 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-[24px] transition-all duration-300 flex items-center justify-center gap-2.5 font-bold text-[11px] uppercase tracking-[1.5px] border border-red-500/20 shadow-lg shadow-red-500/5"
+                      className="w-full py-2.5 bg-zinc-800/40 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest border border-white/5"
                     >
-                      <LogOut size={16} />
-                      Terminate Session
+                      <LogOut size={12} />
+                      Sign Out
                     </button>
                   </div>
                 </div>
@@ -2579,7 +2765,6 @@ export function ChatSidebar({
         )}
       </AnimatePresence>
 
-      {/* Image Zoom */}
       <AnimatePresence>
         {showZoomedAvatar && profile?.avatar_url && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
@@ -2598,14 +2783,14 @@ export function ChatSidebar({
             >
               <img
                 src={profile.avatar_url}
-                className="w-full h-full object-contain rounded-[40px] shadow-2xl"
+                className="w-full h-full object-contain rounded-[32px] shadow-2xl"
                 alt="Zoomed Avatar"
               />
               <button
                 onClick={() => setShowZoomedAvatar(false)}
-                className="absolute -top-12 right-0 p-2 text-white hover:text-indigo-400 transition-colors"
+                className="absolute -top-10 right-0 p-2 text-white hover:text-indigo-400 transition-colors"
               >
-                <X size={32} />
+                <X size={24} />
               </button>
             </motion.div>
           </div>
@@ -2644,6 +2829,7 @@ import {
   CheckCheck,
   Mail,
   Download,
+  Pencil,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
@@ -2670,10 +2856,27 @@ export function ChatWindow({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const isSelectionMode = selectedIds.length > 0;
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Edit Feature States
+  const [editingMessage, setEditingMessage] = useState<any | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    msg: any;
+  } | null>(null);
 
-  // Helper to get the correct delete timestamp for the current user
+  // Logic States
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [floatingDate, setFloatingDate] = useState("");
+  const [showFloatingDate, setShowFloatingDate] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const presenceChannelRef = useRef<any>(null);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+
   const getDeleteTime = useCallback(() => {
     return chat.user1_id === currentUser?.id
       ? chat.user1_deleted_at
@@ -2688,6 +2891,84 @@ export function ChatWindow({
     const timer = setInterval(() => setTick((t) => t + 1), 10000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleScroll = () => {
+    if (!messageContainerRef.current) return;
+    const container = messageContainerRef.current;
+    const scrollTop = container.scrollTop;
+
+    const elements = container.querySelectorAll("[data-date-marker]");
+    let currentVisibleDate = "";
+    let isAnyInlineDateVisible = false;
+
+    elements.forEach((el: Element) => {
+      const htmlEl = el as HTMLElement;
+      const rect = htmlEl.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      const isVisible =
+        rect.top >= containerRect.top && rect.bottom <= containerRect.bottom;
+      if (isVisible) {
+        isAnyInlineDateVisible = true;
+      }
+
+      if (htmlEl.offsetTop <= scrollTop + container.offsetTop + 50) {
+        currentVisibleDate = htmlEl.getAttribute("data-date-marker") || "";
+      }
+    });
+
+    if (currentVisibleDate && currentVisibleDate !== "Today") {
+      setFloatingDate(currentVisibleDate);
+    }
+
+    if (
+      isAnyInlineDateVisible ||
+      scrollTop < 50 ||
+      currentVisibleDate === "Today" ||
+      !currentVisibleDate
+    ) {
+      setShowFloatingDate(false);
+    } else {
+      setShowFloatingDate(true);
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => {
+        setShowFloatingDate(false);
+      }, 2000);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentChatId || !currentUser?.id) return;
+    presenceChannelRef.current = supabase.channel(
+      `chat_presence_${currentChatId}`
+    );
+    presenceChannelRef.current
+      .on("presence", { event: "sync" }, () => {
+        const state = presenceChannelRef.current.presenceState();
+        const otherId = chat.otherId;
+        const typingUsers = Object.values(state).flat() as any[];
+        const isTyping = typingUsers.some(
+          (p) => p.user_id === otherId && p.typing_chat_id === currentChatId
+        );
+        setIsOtherTyping(isTyping);
+      })
+      .subscribe();
+    return () => {
+      if (presenceChannelRef.current) presenceChannelRef.current.unsubscribe();
+    };
+  }, [currentChatId, currentUser?.id, chat.otherId]);
+
+  const handleTyping = () => {
+    if (!presenceChannelRef.current || !currentUser?.id) return;
+    presenceChannelRef.current.track({
+      user_id: currentUser.id,
+      typing_chat_id: currentChatId,
+    });
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      presenceChannelRef.current.untrack();
+    }, 2500);
+  };
 
   const formatJoinedDate = (dateString: string) => {
     if (!dateString) return "Dec 2025";
@@ -2715,7 +2996,6 @@ export function ChatWindow({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error("Download failed:", error);
       window.open(url, "_blank");
     }
   };
@@ -2730,10 +3010,9 @@ export function ChatWindow({
         .eq("conversation_id", activeId)
         .neq("user_id", currentUser.id)
         .eq("is_read", false);
-
       if (onRefresh) onRefresh();
     } catch (err) {
-      console.error("Error clearing unread:", err);
+      console.error(err);
     }
   }, [currentChatId, currentUser?.id, onRefresh]);
 
@@ -2742,11 +3021,20 @@ export function ChatWindow({
     [presence, chat.otherId]
   );
 
-  const sharedMedia = useMemo(() => {
-    return messages.filter((m) => m.type === "image").map((m) => m.text);
-  }, [messages]);
+  const sharedMedia = useMemo(
+    () => messages.filter((m) => m.type === "image").map((m) => m.text),
+    [messages]
+  );
 
   const renderStatus = () => {
+    if (isOtherTyping)
+      return (
+        <div className="flex items-center">
+          <span className="text-indigo-400 font-bold tracking-tight text-[9px] animate-pulse">
+            TYPING...
+          </span>
+        </div>
+      );
     if (isOnline)
       return (
         <div className="flex items-center">
@@ -2760,8 +3048,9 @@ export function ChatWindow({
         <span className="text-zinc-400 font-bold text-[9px]">OFFLINE</span>
       );
     const lastSeenDate = new Date(chat.last_seen_db);
-    const diffInMs = new Date().getTime() - lastSeenDate.getTime();
-    const diffInSecs = Math.floor(diffInMs / 1000);
+    const diffInSecs = Math.floor(
+      (new Date().getTime() - lastSeenDate.getTime()) / 1000
+    );
     let statusText = "";
     if (diffInSecs < 60) statusText = "JUST NOW";
     else if (diffInSecs < 3600)
@@ -2781,9 +3070,7 @@ export function ChatWindow({
   };
 
   useEffect(() => {
-    if (currentChatId) {
-      markAsRead();
-    }
+    if (currentChatId) markAsRead();
   }, [currentChatId, markAsRead]);
 
   useEffect(() => {
@@ -2792,23 +3079,15 @@ export function ChatWindow({
       setMessages([]);
       return;
     }
-
     const deleteTime = getDeleteTime();
-
     const loadMessages = async () => {
       let query = supabase
         .from("messages")
         .select("*")
         .eq("conversation_id", activeId);
-
-      if (deleteTime) {
-        query = query.gt("created_at", deleteTime);
-      }
-
+      if (deleteTime) query = query.gt("created_at", deleteTime);
       const { data } = await query.order("created_at", { ascending: true });
-      if (data) {
-        setMessages(data);
-      }
+      if (data) setMessages(data);
     };
     loadMessages();
 
@@ -2829,15 +3108,10 @@ export function ChatWindow({
             new Date(p.new.created_at) <= new Date(currentDeleteTime)
           )
             return;
-          setMessages((prev) => {
-            const exists = prev.some((m) => m.id === p.new.id);
-            if (exists) return prev;
-            return [...prev, p.new];
-          });
-          if (p.new.user_id !== currentUser?.id) {
-            markAsRead();
-          }
-
+          setMessages((prev) =>
+            prev.some((m) => m.id === p.new.id) ? prev : [...prev, p.new]
+          );
+          if (p.new.user_id !== currentUser?.id) markAsRead();
           if (p.new.type === "image" && p.new.user_id === currentUser?.id) {
             setOptimisticImage(null);
             setIsUploading(false);
@@ -2868,31 +3142,21 @@ export function ChatWindow({
     return () => {
       supabase.removeChannel(msgChannel);
     };
-    // FIX: Ensure dependencies here match the items that can actually change and are needed.
-    // Ensure 'chat' and 'currentUser' properties used are stable.
   }, [currentChatId, currentUser?.id, markAsRead, chat, getDeleteTime]);
 
   useEffect(() => {
-    if (!isSelectionMode) {
+    if (!isSelectionMode)
       scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
   }, [messages.length, optimisticImage, isSelectionMode]);
 
   const ensureConversation = async () => {
-    if (currentChatId) {
-      return currentChatId;
-    }
-
+    if (currentChatId) return currentChatId;
     const { data, error } = await supabase
       .from("conversations")
-      .insert({
-        user1_id: currentUser.id,
-        user2_id: chat.otherId,
-      })
+      .insert({ user1_id: currentUser.id, user2_id: chat.otherId })
       .select()
       .single();
     if (error) return null;
-
     setCurrentChatId(data.id);
     return data.id;
   };
@@ -2901,12 +3165,33 @@ export function ChatWindow({
     if (e) e.preventDefault();
     if (!newMessage.trim() || !currentUser?.id) return;
 
+    if (editingMessage) {
+      const updatedText = newMessage.trim();
+      if (updatedText === editingMessage.text) {
+        setEditingMessage(null);
+        setNewMessage("");
+        return;
+      }
+
+      const msgId = editingMessage.id;
+      setNewMessage("");
+      setEditingMessage(null);
+      try {
+        await supabase
+          .from("messages")
+          .update({ text: updatedText, is_edited: true })
+          .eq("id", msgId);
+      } catch (err) {
+        console.error(err);
+      }
+      return;
+    }
+
     const txt = newMessage;
     setNewMessage("");
     try {
       const activeChatId = await ensureConversation();
       if (!activeChatId) return;
-
       const now = new Date().toISOString();
       await Promise.all([
         supabase.from("messages").insert({
@@ -2915,20 +3200,20 @@ export function ChatWindow({
           text: txt,
           type: "text",
           is_read: false,
-          created_at: now, // Ensure timestamps match
+          created_at: now,
         }),
         supabase
           .from("conversations")
           .update({
             last_message_text: txt,
-            last_message_at: now, // This triggers the sidebar reappear logic
+            last_message_at: now,
             last_message_user_id: currentUser.id,
           })
           .eq("id", activeChatId),
       ]);
       if (onRefresh) onRefresh();
     } catch (err) {
-      console.error("Error sending message:", err);
+      console.error(err);
     }
   };
 
@@ -2941,12 +3226,12 @@ export function ChatWindow({
         .from("conversations")
         .update({ [columnToUpdate]: new Date().toISOString() })
         .eq("id", currentChatId);
-      if (error) throw error;
-
-      if (onBack) onBack();
-      if (onRefresh) onRefresh();
+      if (!error) {
+        if (onBack) onBack();
+        if (onRefresh) onRefresh();
+      }
     } catch (err) {
-      console.error("Error archiving/deleting chat:", err);
+      console.error(err);
     }
   };
 
@@ -2962,26 +3247,41 @@ export function ChatWindow({
     }
   };
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id: string) =>
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
-  };
 
-  const handleContextMenu = (
-    e: React.MouseEvent,
-    id: string,
-    isMe: boolean
-  ) => {
-    if (!isMe) return;
+  const handleContextMenu = (e: React.MouseEvent, msg: any) => {
+    if (msg.user_id !== currentUser?.id) return;
     e.preventDefault();
-    toggleSelect(id);
+    setContextMenu({ x: e.clientX, y: e.clientY, msg });
   };
 
-  const handleImage = async (e: any) => {
-    const file = e.target.files[0];
-    if (!file || !currentUser?.id) return;
+  const handleTouchStart = (msg: any) => {
+    if (msg.user_id !== currentUser?.id) return;
+    longPressTimer.current = setTimeout(() => {
+      setContextMenu({
+        x: window.innerWidth / 2 - 50,
+        y: window.innerHeight / 2,
+        msg,
+      });
+    }, 600);
+  };
 
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  };
+
+  const startEditing = (msg: any) => {
+    setEditingMessage(msg);
+    setNewMessage(msg.text);
+    setContextMenu(null);
+  };
+
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser?.id) return;
     setIsUploading(true);
     const previewUrl = URL.createObjectURL(file);
     setOptimisticImage(previewUrl);
@@ -2993,12 +3293,10 @@ export function ChatWindow({
         .from("chat-attachments")
         .upload(path, file);
       if (uploadError) throw uploadError;
-
       const {
         data: { publicUrl },
       } = supabase.storage.from("chat-attachments").getPublicUrl(path);
       const now = new Date().toISOString();
-
       await Promise.all([
         supabase.from("messages").insert({
           conversation_id: activeChatId,
@@ -3019,7 +3317,6 @@ export function ChatWindow({
       ]);
       if (onRefresh) onRefresh();
     } catch (err) {
-      console.error("Upload error:", err);
       setIsUploading(false);
       setOptimisticImage(null);
     }
@@ -3030,14 +3327,30 @@ export function ChatWindow({
     isFirst: boolean,
     isLast: boolean
   ) => {
-    const r = "18px";
-    const s = "4px";
-    if (isMe) return `${r} ${isFirst ? r : s} ${isLast ? r : s} ${r}`;
-    return `${isFirst ? r : s} ${r} ${r} ${isLast ? r : s}`;
+    const r = "18px",
+      s = "4px";
+    return isMe
+      ? `${r} ${isFirst ? r : s} ${isLast ? r : s} ${r}`
+      : `${isFirst ? r : s} ${r} ${r} ${isLast ? r : s}`;
+  };
+
+  const getDateLabel = (date: Date) => {
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (date.toDateString() === today) return "Today";
+    if (date.toDateString() === yesterday) return "Yesterday";
+    return date.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   return (
-    <div className="flex flex-1 h-dvh bg-[#1e2229] overflow-hidden relative text-white font-sans w-full">
+    <div
+      className="flex flex-1 h-dvh bg-[#1e2229] overflow-hidden relative text-white font-sans w-full"
+      onClick={() => setContextMenu(null)}
+    >
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <motion.div
           animate={{
@@ -3144,204 +3457,270 @@ export function ChatWindow({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 md:px-10 md:py-6 flex flex-col bg-transparent custom-scrollbar scroll-smooth relative">
-          {messages.length > 0 || optimisticImage ? (
-            <div className="flex flex-col w-full relative z-10">
-              {messages.map((msg, index) => {
-                const isMe = msg.user_id === currentUser?.id;
-                const isSelected = selectedIds.includes(msg.id);
-                const prevMsg = messages[index - 1];
-                const nextMsg = messages[index + 1];
-                const msgDate = new Date(msg.created_at);
-                const nextMsgDate = nextMsg
-                  ? new Date(nextMsg.created_at)
-                  : null;
-                const isSameNextUser =
-                  nextMsg && nextMsg.user_id === msg.user_id;
-                const isSameNextMinute =
-                  nextMsgDate &&
-                  msgDate.getMinutes() === nextMsgDate.getMinutes() &&
-                  msgDate.getHours() === nextMsgDate.getHours() &&
-                  msgDate.getDate() === nextMsgDate.getDate();
-                const isFirstInGroup =
-                  !prevMsg || prevMsg.user_id !== msg.user_id;
-                const shouldShowTimestamp =
-                  !isSameNextUser || !isSameNextMinute;
-                const isLastInVisualGroup =
-                  !nextMsg || nextMsg.user_id !== msg.user_id;
+        <div className="flex-1 overflow-hidden relative">
+          <div
+            className={`absolute top-4 left-0 right-0 z-50 flex justify-center pointer-events-none transition-opacity duration-300 ${
+              showFloatingDate ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <span className="px-3 py-1 rounded-full bg-[#252a33]/90 backdrop-blur-md border border-white/10 text-[10px] font-bold text-zinc-200 uppercase tracking-widest shadow-2xl">
+              {floatingDate}
+            </span>
+          </div>
 
-                return (
-                  <div
-                    key={`${msg.id}-${msg.created_at}`}
-                    onContextMenu={(e) => handleContextMenu(e, msg.id, isMe)}
-                    className={`w-full flex relative group transition-all duration-300 ${
-                      isMe ? "flex-row-reverse" : "flex-row"
-                    } ${shouldShowTimestamp ? "mb-3" : "mb-[2px]"}`}
-                  >
-                    <AnimatePresence>
-                      {isSelectionMode && isMe && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.5, width: 0 }}
-                          animate={{ opacity: 1, scale: 1, width: "auto" }}
-                          exit={{ opacity: 0, scale: 0.5, width: 0 }}
-                          className="flex items-center ml-3"
+          <div
+            ref={messageContainerRef}
+            onScroll={handleScroll}
+            className="h-full overflow-y-auto px-4 py-4 md:px-10 md:py-6 flex flex-col bg-transparent custom-scrollbar scroll-smooth"
+          >
+            {messages.length > 0 || optimisticImage ? (
+              <div className="flex flex-col w-full relative z-10">
+                {messages.map((msg, index) => {
+                  const isMe = msg.user_id === currentUser?.id;
+                  const isSelected = selectedIds.includes(msg.id);
+                  const prevMsg = messages[index - 1],
+                    nextMsg = messages[index + 1];
+                  const msgDate = new Date(msg.created_at);
+                  const nextMsgDate = nextMsg
+                    ? new Date(nextMsg.created_at)
+                    : null;
+                  const isSameNextUser =
+                    nextMsg && nextMsg.user_id === msg.user_id;
+                  const isSameNextMinute =
+                    nextMsgDate &&
+                    msgDate.getMinutes() === nextMsgDate.getMinutes() &&
+                    msgDate.getHours() === nextMsgDate.getHours() &&
+                    msgDate.getDate() === nextMsgDate.getDate();
+                  const isFirstInGroup =
+                    !prevMsg || prevMsg.user_id !== msg.user_id;
+                  const shouldShowTimestamp =
+                    !isSameNextUser || !isSameNextMinute;
+                  const isLastInVisualGroup =
+                    !nextMsg || nextMsg.user_id !== msg.user_id;
+                  const label = getDateLabel(msgDate);
+                  const showInlineDate =
+                    !prevMsg ||
+                    new Date(prevMsg.created_at).toDateString() !==
+                      msgDate.toDateString();
+                  return (
+                    <React.Fragment key={`${msg.id}-${msg.created_at}`}>
+                      {showInlineDate && (
+                        <div
+                          data-date-marker={label}
+                          className="flex justify-center my-6"
                         >
-                          <button
-                            onClick={() => toggleSelect(msg.id)}
-                            className={`w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center
-                            ${
-                              isSelected
-                                ? "bg-indigo-500 border-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.4)]"
-                                : "border-white/20 bg-white/5 hover:border-indigo-400"
+                          <span className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                            {label}
+                          </span>
+                        </div>
+                      )}
+                      <div
+                        onContextMenu={(e) => handleContextMenu(e, msg)}
+                        onTouchStart={() => handleTouchStart(msg)}
+                        onTouchEnd={handleTouchEnd}
+                        className={`w-full flex relative group transition-all duration-300 ${
+                          isMe ? "flex-row-reverse" : "flex-row"
+                        } ${shouldShowTimestamp ? "mb-3" : "mb-[2px]"}`}
+                      >
+                        <AnimatePresence>
+                          {isSelectionMode && isMe && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.5, width: 0 }}
+                              animate={{ opacity: 1, scale: 1, width: "auto" }}
+                              exit={{ opacity: 0, scale: 0.5, width: 0 }}
+                              className="flex items-center ml-3"
+                            >
+                              <button
+                                onClick={() => toggleSelect(msg.id)}
+                                className={`w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center ${
+                                  isSelected
+                                    ? "bg-indigo-500 border-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.4)]"
+                                    : "border-white/20 bg-white/5 hover:border-indigo-400"
+                                }`}
+                              >
+                                <Check
+                                  size={10}
+                                  className={`text-white transition-opacity ${
+                                    isSelected ? "opacity-100" : "opacity-0"
+                                  }`}
+                                  strokeWidth={4}
+                                />
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        <div
+                          className={`flex flex-col flex-1 ${
+                            isMe ? "items-end" : "items-start"
+                          }`}
+                          onClick={() =>
+                            isSelectionMode && isMe && toggleSelect(msg.id)
+                          }
+                        >
+                          <motion.div
+                            initial={
+                              isFirstInGroup
+                                ? { opacity: 0, scale: 0.95 }
+                                : false
+                            }
+                            animate={{
+                              opacity: 1,
+                              scale: 1,
+                              backgroundColor: isSelected
+                                ? isMe
+                                  ? "#4f46e5"
+                                  : "#40495a"
+                                : msg.type === "image"
+                                ? "transparent"
+                                : isMe
+                                ? "#4f46e5"
+                                : "#2d3442",
+                            }}
+                            style={{
+                              borderRadius:
+                                msg.type === "image"
+                                  ? "12px"
+                                  : getBubbleRadius(
+                                      isMe,
+                                      isFirstInGroup,
+                                      isLastInVisualGroup
+                                    ),
+                            }}
+                            className={`w-fit min-w-[32px] max-w-[85%] md:max-w-[70%] transition-all duration-200 relative overflow-hidden shadow-sm ${
+                              msg.type !== "image"
+                                ? `px-4 py-2 md:py-2.5 text-[13.5px] leading-relaxed ${
+                                    isMe
+                                      ? "text-white"
+                                      : "text-slate-100 font-medium"
+                                  }`
+                                : ""
                             }`}
                           >
-                            <Check
-                              size={10}
-                              className={`text-white transition-opacity ${
-                                isSelected ? "opacity-100" : "opacity-0"
-                              }`}
-                              strokeWidth={4}
-                            />
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                    <div
-                      className={`flex flex-col flex-1 ${
-                        isMe ? "items-end" : "items-start"
-                      }`}
-                      onClick={() =>
-                        isSelectionMode && isMe && toggleSelect(msg.id)
-                      }
-                    >
-                      <motion.div
-                        initial={
-                          isFirstInGroup ? { opacity: 0, scale: 0.95 } : false
-                        }
-                        animate={{
-                          opacity: 1,
-                          scale: 1,
-                          backgroundColor: isSelected
-                            ? isMe
-                              ? "#4f46e5"
-                              : "#40495a"
-                            : msg.type === "image"
-                            ? "transparent"
-                            : isMe
-                            ? "#4f46e5"
-                            : "#2d3442",
-                        }}
-                        style={{
-                          borderRadius:
-                            msg.type === "image"
-                              ? "12px"
-                              : getBubbleRadius(
-                                  isMe,
-                                  isFirstInGroup,
-                                  isLastInVisualGroup
-                                ),
-                        }}
-                        className={`w-fit min-w-[32px] max-w-[85%] md:max-w-[70%] transition-all duration-200 relative overflow-hidden shadow-sm ${
-                          msg.type !== "image"
-                            ? `px-4 py-2 md:py-2.5 text-[13.5px] leading-relaxed ${
-                                isMe
-                                  ? "text-white"
-                                  : "text-slate-100 font-medium"
-                              }`
-                            : ""
-                        }`}
-                      >
-                        {msg.type === "image" ? (
-                          <div
-                            className="relative group/img cursor-zoom-in"
-                            onClick={() => setSelectedImage(msg.text)}
-                          >
-                            <img
-                              src={msg.text}
-                              className={`rounded-xl max-h-48 md:max-h-64 w-auto object-cover transition-all duration-300 group-hover/img:brightness-90 ${
-                                isSelected ? "brightness-50" : ""
-                              }`}
-                              alt="Shared"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
-                              <div className="p-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
-                                <Maximize2 size={18} className="text-white" />
+                            {msg.type === "image" ? (
+                              <div
+                                className="relative group/img cursor-zoom-in"
+                                onClick={() => setSelectedImage(msg.text)}
+                              >
+                                <img
+                                  src={msg.text}
+                                  className={`rounded-xl max-h-48 md:max-h-64 w-auto object-cover transition-all duration-300 group-hover/img:brightness-90 ${
+                                    isSelected ? "brightness-50" : ""
+                                  }`}
+                                  alt="Shared"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                  <div className="p-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+                                    <Maximize2
+                                      size={18}
+                                      className="text-white"
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="whitespace-pre-wrap break-words relative z-10">
-                            {msg.text}
-                          </p>
-                        )}
-                      </motion.div>
-                      <div
-                        className={`flex items-center gap-1.5 mt-1.5 ${
-                          isMe ? "flex-row-reverse" : "flex-row"
-                        }`}
-                      >
-                        {shouldShowTimestamp && (
-                          <span className="text-[7.5px] font-medium text-zinc-400/30 uppercase tracking-[0.12em]">
-                            {msgDate.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                            })}
-                          </span>
-                        )}
-                        {isMe && (
-                          <div className="flex items-center opacity-70">
-                            {msg.is_read ? (
-                              <CheckCheck size={11} className="text-sky-400" />
                             ) : (
-                              <Check size={11} className="text-zinc-400" />
+                              <p className="whitespace-pre-wrap break-words relative z-10">
+                                {msg.text}
+                              </p>
+                            )}
+                          </motion.div>
+                          <div
+                            className={`flex items-center gap-1.5 mt-1.5 ${
+                              isMe ? "flex-row-reverse" : "flex-row"
+                            }`}
+                          >
+                            {shouldShowTimestamp && (
+                              <span className="text-[7.5px] font-medium text-zinc-400/30 uppercase tracking-[0.12em]">
+                                {msgDate.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })}
+                              </span>
+                            )}
+                            {msg.is_edited && (
+                              <span className="text-[7.5px] text-zinc-500 font-bold uppercase tracking-wider flex items-center gap-0.5">
+                                • <span className="italic">Edited</span>
+                              </span>
+                            )}
+                            {isMe && (
+                              <div className="flex items-center opacity-70">
+                                {msg.is_read ? (
+                                  <CheckCheck
+                                    size={11}
+                                    className="text-sky-400"
+                                  />
+                                ) : (
+                                  <Check size={11} className="text-zinc-400" />
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              {optimisticImage && (
-                <div className="w-full flex flex-row-reverse mb-3">
-                  <div className="flex flex-col items-end flex-1">
-                    <div className="relative w-fit max-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#2d3442]/50">
-                      <img
-                        src={optimisticImage}
-                        className="max-h-40 object-cover opacity-40 grayscale-[0.5]"
-                        alt="Uploading..."
-                      />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-indigo-600/80 flex items-center justify-center shadow-xl">
-                          <Loader2
-                            className="animate-spin text-white"
-                            size={16}
-                          />
                         </div>
-                        <span className="text-[8px] font-bold text-white uppercase tracking-widest bg-black/40 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
-                          Sending...
-                        </span>
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+                {optimisticImage && (
+                  <div className="w-full flex flex-row-reverse mb-3">
+                    <div className="flex flex-col items-end flex-1">
+                      <div className="relative w-fit max-w-[200px] rounded-xl overflow-hidden border border-white/10 bg-[#2d3442]/50">
+                        <img
+                          src={optimisticImage}
+                          className="max-h-40 object-cover opacity-40 grayscale-[0.5]"
+                          alt="Uploading..."
+                        />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-indigo-600/80 flex items-center justify-center shadow-xl">
+                            <Loader2
+                              className="animate-spin text-white"
+                              size={16}
+                            />
+                          </div>
+                          <span className="text-[8px] font-bold text-white uppercase tracking-widest bg-black/40 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+                            Sending...
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={scrollRef} className="h-4" />
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-              <div className="p-4 rounded-full bg-indigo-500/5 border border-indigo-500/10">
-                <MessageSquare size={18} className="text-indigo-500/30" />
+                )}
+                <div ref={scrollRef} className="h-4" />
               </div>
-              <p className="text-[9px] text-zinc-500 font-black uppercase tracking-[0.15em]">
-                Encrypted Connection
-              </p>
-            </div>
-          )}
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+                <div className="p-4 rounded-full bg-indigo-500/5 border border-indigo-500/10">
+                  <MessageSquare size={18} className="text-indigo-500/30" />
+                </div>
+                <p className="text-[9px] text-zinc-500 font-black uppercase tracking-[0.15em]">
+                  Encrypted Connection
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="px-4 py-4 md:px-6 md:py-4 bg-[#252a33]/85 backdrop-blur-xl border-t border-white/5 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {editingMessage && (
+            <div className="flex items-center justify-between px-3 py-2 bg-indigo-500/10 border-l-2 border-indigo-500 mb-2 rounded-r-lg">
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">
+                  Editing Message
+                </span>
+                <p className="text-[11px] text-slate-300 truncate italic">
+                  {editingMessage.text}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingMessage(null);
+                  setNewMessage("");
+                }}
+                className="p-1 hover:bg-white/10 rounded-full text-zinc-400"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
           <form
             onSubmit={handleSend}
             className="flex gap-2 md:gap-3 items-center max-w-4xl mx-auto"
@@ -3363,8 +3742,11 @@ export function ChatWindow({
             </button>
             <input
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Message..."
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setNewMessage(e.target.value);
+                handleTyping();
+              }}
+              placeholder={editingMessage ? "Edit message..." : "Message..."}
               className="flex-1 bg-[#2d3442] border border-white/10 text-white text-[13.5px] rounded-xl px-4 py-2.5 outline-none focus:border-indigo-500/40 transition-all placeholder:text-zinc-500"
             />
             <button
@@ -3372,13 +3754,12 @@ export function ChatWindow({
               disabled={!newMessage.trim()}
               className="bg-indigo-600 text-white h-10 w-10 flex items-center justify-center rounded-xl hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 shadow-md shadow-indigo-600/10"
             >
-              <Send size={16} />
+              {editingMessage ? <Check size={16} /> : <Send size={16} />}
             </button>
           </form>
         </div>
       </div>
 
-      {/* Sidebar / Info Panel */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -3482,118 +3863,29 @@ export function ChatWindow({
                     {chat.bio || "No information shared."}
                   </p>
                 </div>
-                <div className="p-6 border-b border-white/5">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <ImageIcon size={12} className="text-indigo-400" />
-                      <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                        Media
-                      </h4>
-                    </div>
-                    <span className="text-[9px] font-bold px-2 py-0.5 bg-indigo-500/10 rounded text-indigo-400">
-                      {sharedMedia.length}
-                    </span>
-                  </div>
-                  {sharedMedia.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-2">
-                      {sharedMedia.slice(0, 12).map((url, i) => (
-                        <div
-                          key={i}
-                          className="aspect-square rounded-lg bg-[#2d3442] overflow-hidden border border-white/5 cursor-pointer hover:border-indigo-500/50 transition-colors"
-                          onClick={() => setSelectedImage(url)}
-                        >
-                          <img
-                            src={url}
-                            className="w-full h-full object-cover opacity-90"
-                            alt=""
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-8 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
-                      <span className="text-[9px] font-bold text-zinc-600 uppercase">
-                        Empty
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-6 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Trash2 size={12} className="text-red-400" />
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                      Danger Zone
-                    </h4>
-                  </div>
-                  <button
-                    onClick={handleDeleteChat}
-                    className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[10px] font-black uppercase tracking-widest transition-all"
-                  >
-                    Delete Chat For Me
-                  </button>
-                </div>
+                {/* Media and shared elements would continue here */}
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Image Viewer Modal */}
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-md"
-            onClick={() => setSelectedImage(null)}
-          >
-            <button
-              className="absolute top-6 left-6 p-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white z-[310] transition-all"
-              onClick={() => setSelectedImage(null)}
-            >
-              <X size={20} />
-            </button>
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative max-w-5xl max-h-full flex items-center justify-center group"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img
-                src={selectedImage}
-                className="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/5"
-                alt="Enlarged view"
-              />
-              <button
-                onClick={() => downloadImage(selectedImage)}
-                className="absolute top-4 right-4 p-3 rounded-2xl bg-black/60 backdrop-blur-xl text-white hover:bg-indigo-600 border border-white/10 shadow-xl transition-all active:scale-90"
-                title="Download to device"
-              >
-                <Download size={20} />
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Avatar Zoom Modal */}
+      {/* Profile Picture Zoom Overlay */}
       <AnimatePresence>
         {isZoomed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
             onClick={() => setIsZoomed(false)}
+            className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-8"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-lg w-full aspect-square rounded-3xl overflow-hidden shadow-2xl border border-white/10"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
               <button
                 onClick={() => setIsZoomed(false)}
@@ -3621,6 +3913,38 @@ export function ChatWindow({
                 </p>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Context Menu for Editing */}
+      <AnimatePresence>
+        {contextMenu && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+            className="fixed z-[500] min-w-[120px] bg-[#2d3442]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1.5"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => startEditing(contextMenu.msg)}
+              className="w-full px-4 py-2 flex items-center gap-2.5 text-slate-200 hover:bg-white/10 transition-colors text-[11px] font-bold uppercase tracking-widest"
+            >
+              <Pencil size={14} className="text-indigo-400" />
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                toggleSelect(contextMenu.msg.id);
+                setContextMenu(null);
+              }}
+              className="w-full px-4 py-2 flex items-center gap-2.5 text-slate-200 hover:bg-white/10 transition-colors text-[11px] font-bold uppercase tracking-widest"
+            >
+              <Check size={14} className="text-emerald-400" />
+              Select
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -3655,12 +3979,14 @@ interface Profile {
 }
 
 interface NewChatModalProps {
+  isOpen: boolean;
   currentUserId: string;
   onClose: () => void;
   onChatCreated: (chatId: string | null, newUser?: Profile) => void;
 }
 
 export function NewChatModal({
+  isOpen,
   currentUserId,
   onClose,
   onChatCreated,
@@ -3780,6 +4106,8 @@ export function NewChatModal({
       setCreating(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
@@ -3945,212 +4273,249 @@ export function NewChatModal({
 <file path="src/components/chat/ProfileModal.tsx">
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   X,
-  LogOut,
+  Camera,
+  Loader2,
   User,
   Mail,
+  LogOut,
+  Check,
   Shield,
-  Calendar,
-  ChevronRight,
-  CheckCircle2,
-  Settings2,
-  Lock,
+  Bell,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface ProfileModalProps {
-  isOpen: boolean;
+  profile: any;
   onClose: () => void;
-  user: any;
+  onUpdate: () => void;
+  isOpen: boolean;
 }
 
 export default function ProfileModal({
-  isOpen,
+  profile,
   onClose,
-  user,
+  onUpdate,
+  isOpen,
 }: ProfileModalProps) {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const handleUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          bio: bio,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", profile.id);
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    await supabase.auth.signOut();
-    window.location.href = "/auth";
+      if (error) throw error;
+      onUpdate();
+      onClose();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  if (!mounted) return null;
+  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      if (!event.target.files || event.target.files.length === 0) return;
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${profile.id}-${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", profile.id);
+
+      if (updateError) throw updateError;
+      onUpdate();
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+      />
+
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        className="relative w-full max-w-[480px] bg-[#0f1115] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl"
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+            Profile Settings
+          </h2>
+          <button
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          />
-
-          {/* Modal Content */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative w-full max-w-[440px] bg-[#1a1b1e] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl"
+            className="p-2.5 hover:bg-white/5 rounded-2xl transition-all duration-200 group"
           >
-            {/* Header / Banner Area */}
-            <div className="h-32 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-transparent relative">
-              <button
-                onClick={onClose}
-                className="absolute top-6 right-6 p-2 rounded-full bg-black/20 text-zinc-400 hover:text-white transition-colors backdrop-blur-md border border-white/5"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Profile Avatar Section */}
-            <div className="px-8 pb-8 -mt-12 relative">
-              <div className="flex items-end justify-between mb-6">
-                <div className="relative group">
-                  <div className="w-24 h-24 rounded-3xl bg-[#242529] border-4 border-[#1a1b1e] flex items-center justify-center text-indigo-400 shadow-xl overflow-hidden">
-                    <User
-                      size={40}
-                      className="group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 border-4 border-[#1a1b1e] rounded-full" />
-                </div>
-
-                <div className="flex gap-2 pb-2">
-                  <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider rounded-full">
-                    Pro Member
-                  </span>
-                </div>
-              </div>
-
-              {/* User Identity */}
-              <div className="space-y-1 mb-8">
-                <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                  {user?.user_metadata?.full_name || "Anonymous User"}
-                  <CheckCircle2 size={18} className="text-indigo-400" />
-                </h2>
-                <p className="text-zinc-500 text-sm font-medium flex items-center gap-2">
-                  <Mail size={14} className="text-zinc-600" />
-                  {user?.email}
-                </p>
-              </div>
-
-              {/* Info Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-8">
-                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
-                  <Shield
-                    size={16}
-                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
-                  />
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
-                    Security
-                  </p>
-                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
-                    Verified Account
-                  </p>
-                </div>
-                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
-                  <Calendar
-                    size={16}
-                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
-                  />
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
-                    Joined
-                  </p>
-                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
-                    {new Date(user?.created_at).toLocaleDateString(undefined, {
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              {/* Actions List */}
-              <div className="space-y-2 mb-8">
-                <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-[0.2em] px-1 mb-3">
-                  System Settings
-                </p>
-
-                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                      <Settings2 size={16} />
-                    </div>
-                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
-                      Preferences
-                    </span>
-                  </div>
-                  <ChevronRight
-                    size={14}
-                    className="text-zinc-600 group-hover:text-zinc-400"
-                  />
-                </button>
-
-                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                      <Lock size={16} />
-                    </div>
-                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
-                      Security & Privacy
-                    </span>
-                  </div>
-                  <ChevronRight
-                    size={14}
-                    className="text-zinc-600 group-hover:text-zinc-400"
-                  />
-                </button>
-              </div>
-
-              {/* Footer Actions */}
-              <div className="pt-6 border-t border-white/5">
-                <button
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="w-full h-12 flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
-                >
-                  {isLoggingOut ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                    >
-                      <LogOut size={18} />
-                    </motion.div>
-                  ) : (
-                    <>
-                      <LogOut size={18} />
-                      Terminate Session
-                    </>
-                  )}
-                </button>
-                <p className="text-center text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em] mt-6">
-                  Chatterly Secure Profile • V0.1.0
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            <X className="w-5 h-5 text-zinc-400 group-hover:text-white group-hover:rotate-90 transition-all" />
+          </button>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center mb-10">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-[40px] bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 border-2 border-white/10 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:border-[#6366f1]/50 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+                {profile?.avatar_url ? (
+                  <Image
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <User className="w-12 h-12 text-[#6366f1] mb-1" />
+                  </div>
+                )}
+
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-[#6366f1] animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute -bottom-2 -right-2 p-3 bg-[#6366f1] hover:bg-[#4f46e5] text-white rounded-2xl shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 group-hover:shadow-[#6366f1]/20"
+              >
+                <Camera className="w-5 h-5" />
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={uploadAvatar}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* Form Fields */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
+                Display Name
+              </label>
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="How should we call you?"
+                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-[#6366f1]/50 focus:bg-white/[0.05] transition-all duration-300 placeholder:text-zinc-600"
+                />
+                <User className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-[#6366f1] transition-colors" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
+                About Me
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Share a bit about yourself..."
+                rows={3}
+                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-[#6366f1]/50 focus:bg-white/[0.05] transition-all duration-300 placeholder:text-zinc-600 resize-none"
+              />
+            </div>
+
+            <div className="pt-2">
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-4 h-4 text-zinc-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">
+                    Email Address
+                  </p>
+                  <p className="text-sm text-zinc-300 truncate">
+                    {profile?.email}
+                  </p>
+                </div>
+                <div className="p-1.5 bg-green-500/10 rounded-lg">
+                  <Check className="w-3 h-3 text-green-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-6 bg-white/[0.02] border-t border-white/5 flex flex-col gap-3">
+          <button
+            onClick={handleUpdate}
+            disabled={isUpdating}
+            className="w-full bg-[#6366f1] hover:bg-[#4f46e5] disabled:opacity-50 text-white font-semibold py-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-[#6366f1]/20 active:scale-[0.98]"
+          >
+            {isUpdating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Check className="w-5 h-5" />
+            )}
+            Save Changes
+          </button>
+
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/auth";
+            }}
+            className="w-full bg-white/5 hover:bg-red-500/10 text-zinc-400 hover:text-red-500 font-medium py-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 group"
+          >
+            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Sign Out
+          </button>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 </file>

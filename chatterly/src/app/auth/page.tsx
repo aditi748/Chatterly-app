@@ -202,8 +202,43 @@ export default function AuthPage() {
       >
         <div className="text-center mb-6 sm:mb-8">
           <motion.div layoutId="logo" className="inline-block relative group">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-xl shadow-indigo-500/20">
-              C
+            <div className="absolute inset-0 bg-indigo-500/30 blur-xl rounded-full group-hover:bg-indigo-500/50 transition-all duration-500" />
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 overflow-hidden shadow-[0_8px_30px_rgb(79,70,229,0.3)]">
+              {/* HIGH-DEFINITION VECTOR LOGO */}
+              <svg
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full"
+              >
+                <rect width="100" height="100" rx="22" fill="url(#logo-grad)" />
+                <text
+                  x="50%"
+                  y="53%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="white"
+                  fontSize="55"
+                  fontWeight="bold"
+                  fontFamily="Inter, system-ui, sans-serif"
+                  style={{ filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.2))" }}
+                >
+                  C
+                </text>
+                <defs>
+                  <linearGradient
+                    id="logo-grad"
+                    x1="0"
+                    y1="0"
+                    x2="100"
+                    y2="100"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="#6366f1" />
+                    <stop offset="1" stopColor="#4338ca" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </motion.div>
           <h2 className="text-xl sm:text-2xl font-bold text-white mt-3 sm:mt-4">

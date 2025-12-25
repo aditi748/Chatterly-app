@@ -1,241 +1,247 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   X,
-  LogOut,
+  Camera,
+  Loader2,
   User,
   Mail,
+  LogOut,
+  Check,
   Shield,
-  Calendar,
-  ChevronRight,
-  CheckCircle2,
-  Settings2,
-  Lock,
-  Edit2,
+  Bell,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface ProfileModalProps {
-  isOpen: boolean;
+  profile: any;
   onClose: () => void;
-  user: any; // The Auth User object
-  profile: any; // The Database Profile object (has the edits)
-  onRefresh?: () => void;
+  onUpdate: () => void;
+  isOpen: boolean;
 }
 
 export default function ProfileModal({
-  isOpen,
-  onClose,
-  user,
   profile,
-  onRefresh,
+  onClose,
+  onUpdate,
+  isOpen,
 }: ProfileModalProps) {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const handleUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          bio: bio,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", profile.id);
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    await supabase.auth.signOut();
-    window.location.href = "/auth";
+      if (error) throw error;
+      onUpdate();
+      onClose();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  if (!mounted) return null;
+  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      if (!event.target.files || event.target.files.length === 0) return;
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${profile.id}-${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", profile.id);
+
+      if (updateError) throw updateError;
+      onUpdate();
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+      />
+
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        className="relative w-full max-w-[480px] bg-[#0f1115] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl"
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+            Profile Settings
+          </h2>
+          <button
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          />
-
-          {/* Modal Content */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative w-full max-w-[440px] bg-[#1a1b1e] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl"
+            className="p-2.5 hover:bg-white/5 rounded-2xl transition-all duration-200 group"
           >
-            {/* Header / Banner Area */}
-            <div className="h-32 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-transparent relative">
-              <button
-                onClick={onClose}
-                className="absolute top-6 right-6 p-2 rounded-full bg-black/20 text-zinc-400 hover:text-white transition-colors backdrop-blur-md border border-white/5"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Profile Avatar Section */}
-            <div className="px-8 pb-8 -mt-12 relative">
-              <div className="flex items-end justify-between mb-6">
-                <div className="relative group">
-                  <div className="w-24 h-24 rounded-3xl bg-[#242529] border-4 border-[#1a1b1e] flex items-center justify-center text-indigo-400 shadow-xl overflow-hidden">
-                    {profile?.avatar_url ? (
-                      <img
-                        src={profile.avatar_url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User
-                        size={40}
-                        className="group-hover:scale-110 transition-transform duration-500"
-                      />
-                    )}
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 border-4 border-[#1a1b1e] rounded-full" />
-                </div>
-
-                <div className="flex gap-2 pb-2">
-                  <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider rounded-full">
-                    Pro Member
-                  </span>
-                </div>
-              </div>
-
-              {/* User Identity */}
-              <div className="space-y-1 mb-6">
-                <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                  {/* Changed from user?.user_metadata?.full_name to profile?.full_name */}
-                  {profile?.full_name ||
-                    user?.user_metadata?.full_name ||
-                    "Anonymous User"}
-                  <CheckCircle2 size={18} className="text-indigo-400" />
-                </h2>
-                <p className="text-zinc-500 text-sm font-medium flex items-center gap-2">
-                  <Mail size={14} className="text-zinc-600" />
-                  {user?.email}
-                </p>
-              </div>
-
-              {/* Bio / Status Section (New) */}
-              <div className="mb-8 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1.5 flex items-center gap-2">
-                  Bio / Status
-                </p>
-                <p className="text-sm text-zinc-300 leading-relaxed italic">
-                  "{profile?.bio || "No bio set yet."}"
-                </p>
-              </div>
-
-              {/* Info Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-8">
-                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
-                  <Shield
-                    size={16}
-                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
-                  />
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
-                    Security
-                  </p>
-                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
-                    Verified Account
-                  </p>
-                </div>
-                <div className="p-4 rounded-2xl bg-[#242529] border border-white/5 group hover:border-indigo-500/30 transition-colors">
-                  <Calendar
-                    size={16}
-                    className="text-zinc-500 mb-2 group-hover:text-indigo-400 transition-colors"
-                  />
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
-                    Joined
-                  </p>
-                  <p className="text-sm text-zinc-200 font-semibold mt-0.5">
-                    {user?.created_at
-                      ? new Date(user.created_at).toLocaleDateString(
-                          undefined,
-                          {
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Actions List */}
-              <div className="space-y-2 mb-8">
-                <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-[0.2em] px-1 mb-3">
-                  System Settings
-                </p>
-
-                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                      <Settings2 size={16} />
-                    </div>
-                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
-                      Preferences
-                    </span>
-                  </div>
-                  <ChevronRight
-                    size={14}
-                    className="text-zinc-600 group-hover:text-zinc-400"
-                  />
-                </button>
-
-                <button className="w-full group flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                      <Lock size={16} />
-                    </div>
-                    <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
-                      Security & Privacy
-                    </span>
-                  </div>
-                  <ChevronRight
-                    size={14}
-                    className="text-zinc-600 group-hover:text-zinc-400"
-                  />
-                </button>
-              </div>
-
-              {/* Footer Actions */}
-              <div className="pt-6 border-t border-white/5">
-                <button
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="w-full h-12 flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
-                >
-                  {isLoggingOut ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                    >
-                      <LogOut size={18} />
-                    </motion.div>
-                  ) : (
-                    <>
-                      <LogOut size={18} />
-                      Terminate Session
-                    </>
-                  )}
-                </button>
-                <p className="text-center text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em] mt-6">
-                  Chatterly Secure Profile • V0.1.0
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            <X className="w-5 h-5 text-zinc-400 group-hover:text-white group-hover:rotate-90 transition-all" />
+          </button>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center mb-10">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-[40px] bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 border-2 border-white/10 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:border-[#6366f1]/50 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+                {profile?.avatar_url ? (
+                  <Image
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <User className="w-12 h-12 text-[#6366f1] mb-1" />
+                  </div>
+                )}
+
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-[#6366f1] animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute -bottom-2 -right-2 p-3 bg-[#6366f1] hover:bg-[#4f46e5] text-white rounded-2xl shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 group-hover:shadow-[#6366f1]/20"
+              >
+                <Camera className="w-5 h-5" />
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={uploadAvatar}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* Form Fields */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
+                Display Name
+              </label>
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="How should we call you?"
+                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-[#6366f1]/50 focus:bg-white/[0.05] transition-all duration-300 placeholder:text-zinc-600"
+                />
+                <User className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-[#6366f1] transition-colors" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
+                About Me
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Share a bit about yourself..."
+                rows={3}
+                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-[#6366f1]/50 focus:bg-white/[0.05] transition-all duration-300 placeholder:text-zinc-600 resize-none"
+              />
+            </div>
+
+            <div className="pt-2">
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-4 h-4 text-zinc-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">
+                    Email Address
+                  </p>
+                  <p className="text-sm text-zinc-300 truncate">
+                    {profile?.email}
+                  </p>
+                </div>
+                <div className="p-1.5 bg-green-500/10 rounded-lg">
+                  <Check className="w-3 h-3 text-green-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-6 bg-white/[0.02] border-t border-white/5 flex flex-col gap-3">
+          <button
+            onClick={handleUpdate}
+            disabled={isUpdating}
+            className="w-full bg-[#6366f1] hover:bg-[#4f46e5] disabled:opacity-50 text-white font-semibold py-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-[#6366f1]/20 active:scale-[0.98]"
+          >
+            {isUpdating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Check className="w-5 h-5" />
+            )}
+            Save Changes
+          </button>
+
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/auth";
+            }}
+            className="w-full bg-white/5 hover:bg-red-500/10 text-zinc-400 hover:text-red-500 font-medium py-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 group"
+          >
+            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Sign Out
+          </button>
+        </div>
+      </motion.div>
+    </div>
   );
 }
